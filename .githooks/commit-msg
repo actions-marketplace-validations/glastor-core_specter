@@ -9,3 +9,4 @@ if ! echo "$FIRST_LINE" | grep -Eq '^(revert: )?(feat|fix|polish|docs|style|refa
   echo "   Expected format: <type>(<scope>)[!]: <subject> (see .github/COMMIT_CONVENTION.md)"
   exit 1
 fi
+

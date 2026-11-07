@@ -70,8 +70,8 @@ jobs:
             NEW_VER="$CURRENT_CARGO_VER"
             IS_INITIAL="true"
             COMMIT_RANGE="HEAD"
-          elif ! gh release view "$LATEST_TAG" >/dev/null 2>&1 && [ "$(git rev-parse "${LATEST_TAG}^{commit}")" = "$(git rev-parse HEAD)" ]; then
-            echo "🎉 Tag inicial ${LATEST_TAG} detectado en HEAD sin GitHub Release publicado: procediendo a compilar y publicar ${LATEST_TAG}"
+          elif ! gh release view "$LATEST_TAG" >/dev/null 2>&1; then
+            echo "🎉 Tag ${LATEST_TAG} detectado sin GitHub Release publicado: re-sincronizando a HEAD y publicando ${LATEST_TAG}"
             NEW_VER="${LATEST_TAG#v}"
             IS_INITIAL="true"
             COMMIT_RANGE="HEAD"
@@ -258,6 +258,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Compile standalone release binary
+        shell: bash
         env:
           MATRIX_TARGET: ${{ matrix.target }}
         run: cargo build --release --locked --target "$MATRIX_TARGET"
