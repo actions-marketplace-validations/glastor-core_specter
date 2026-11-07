@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# GLASTOR® Specter — Pre-Commit Rust Format & Clippy Gate
+set -e
+cargo fmt --all -- --check
+cargo clippy --all-targets -- -D warnings

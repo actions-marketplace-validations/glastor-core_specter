@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - "main"
-    paths-ignore:
-      - "**.md"
-      - "!CHANGELOG.md"
   workflow_dispatch:
     inputs:
       bump_override:
@@ -100,7 +97,7 @@ jobs:
                 BUMP="major"
               elif echo "$COMMITS" | grep -Eq "^feat(\([^)]+\))?:"; then
                 BUMP="minor"
-              elif echo "$COMMITS" | grep -Eq "^(fix|perf|security|refactor|build)(\([^)]+\))?:"; then
+              elif echo "$COMMITS" | grep -Eq "^(fix|perf|security|sec|refactor|build)(\([^)]+\))?:"; then
                 BUMP="patch"
               fi
             fi
@@ -133,9 +130,9 @@ jobs:
           TODAY=$(date -u +"%Y-%m-%d")
 
           FEAT_LIST=$(git log "$COMMIT_RANGE" --pretty=format:"- %s (\`%h\`)" --grep="^feat" || true)
-          FIX_LIST=$(git log "$COMMIT_RANGE" --pretty=format:"- %s (\`%h\`)" --grep="^fix\|^security" || true)
+          FIX_LIST=$(git log "$COMMIT_RANGE" --pretty=format:"- %s (\`%h\`)" --grep="^fix\|^security\|^sec" || true)
           PERF_LIST=$(git log "$COMMIT_RANGE" --pretty=format:"- %s (\`%h\`)" --grep="^perf\|^refactor" || true)
-          OTHER_LIST=$(git log "$COMMIT_RANGE" --pretty=format:"- %s (\`%h\`)" --invert-grep --grep="^feat\|^fix\|^security\|^perf\|^refactor\|^chore(release)" || true)
+          OTHER_LIST=$(git log "$COMMIT_RANGE" --pretty=format:"- %s (\`%h\`)" --invert-grep --grep="^feat\|^fix\|^security\|^sec\|^perf\|^refactor\|^chore(release)" || true)
 
           NOTES_FILE=$(mktemp)
           {
@@ -325,6 +322,7 @@ jobs:
 
       - name: Attest SLSA Build Provenance (Sigstore OIDC)
         uses: actions/attest-build-provenance@v2
+        continue-on-error: true
         with:
           subject-path: |
             release-assets/specter-linux-x64

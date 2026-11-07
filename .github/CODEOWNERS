@@ -1,7 +1,39 @@
-# GLASTOR® Core Ownership & Mandatory Review Matrix
-* @glastor-dev
-/.github/ @glastor-dev
-/src/ @glastor-dev
-/Cargo.toml @glastor-dev
-/action.yml @glastor-dev
+# ═══════════════════════════════════════════════════════════════════════════
+# SPECTER POLYGLOT AST API CONTRACT & SEMVER GATEKEEPER - CODEOWNERS
+# ═══════════════════════════════════════════════════════════════════════════
+# Propósito: Definir la propiedad del código y protocolos de revisión.
+# Repositorio: https://github.com/glastor-core/specter (rama main)
+# Referencia: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# ═══════════════════════════════════════════════════════════════════════════
 
+# [ GLOBAL MAINTAINER ]
+# Revisor por defecto de todos los activos del repositorio.
+* @glastor-dev
+
+# [ INFRAESTRUCTURA DE GITHUB ACTIONS, CARGO & CONFIGURACIÓN ]
+# Workflows de CI/CD, manifiesto de Rust y metadatos de la GitHub Action.
+.github/ @glastor-dev
+action.yml @glastor-dev
+Cargo.toml @glastor-dev
+Cargo.lock @glastor-dev
+.specter/ @glastor-dev
+
+# [ CÓDIGO FUENTE & MÓDULOS DEL MOTOR SPECTER ]
+# Módulos centrales de CLI, extractor AST, diferenciador SemVer, Trojan Guard y reportes.
+/src/ @glastor-dev
+/src/main.rs @glastor-dev
+/src/extractor.rs @glastor-dev
+/src/differ.rs @glastor-dev
+/src/commit_guard.rs @glastor-dev
+/src/report.rs @glastor-dev
+*.rs @glastor-dev
+
+# [ GOBERNANZA, COMPLIANCE & DOCUMENTACIÓN ]
+# Documentación pública y archivos de licencia/contribución.
+README.md @glastor-dev
+CHANGELOG.md @glastor-dev
+CONTRIBUTORS.md @glastor-dev
+CITATION.cff @glastor-dev
+LICENSE @glastor-dev
+
+# ═══════════════════════════════════════════════════════════════════════════

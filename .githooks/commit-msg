@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# GLASTOR® Specter — Conventional Commits Gatekeeper Hook
+COMMIT_MSG_FILE="$1"
+FIRST_LINE=$(head -n 1 "$COMMIT_MSG_FILE" | tr -d '\r')
+
+if ! echo "$FIRST_LINE" | grep -Eq '^(revert: )?(feat|fix|polish|docs|style|refactor|perf|test|workflow|ci|chore|types|sec|security|build)(\([a-zA-Z0-9_.-]+\))?!?: .{1,100}$'; then
+  echo "❌ [GLASTOR Specter Commit Hook]: Invalid Conventional Commit header:"
+  echo "   \"$FIRST_LINE\""
+  echo "   Expected format: <type>(<scope>)[!]: <subject> (see .github/COMMIT_CONVENTION.md)"
+  exit 1
+fi
