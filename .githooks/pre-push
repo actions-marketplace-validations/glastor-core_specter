@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "🛡️ [GLASTOR® Specter Shift-Left Pre-Push Gate] Verifying formatting, Clippy & API Contract..."
+
+cargo fmt --all -- --check
+cargo clippy --all-targets -- -D warnings
+cargo test --quiet
+
+echo "✅ [GLASTOR® Specter] All 20 tests & Zero-Defect checks passed!"
+

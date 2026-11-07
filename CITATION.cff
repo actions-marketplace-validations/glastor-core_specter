@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+title: "GLASTOR® Specter — Polyglot AST API Contract Differ & Mathematical SemVer Gatekeeper"
+message: "If you use this software in your CI/CD pipelines or research, please cite it using the metadata from this file."
+type: software
+authors:
+  - given-names: "Andrés Antonio"
+    family-names: "Cardoso"
+    email: "ventas@glastor.es"
+    affiliation: "GLASTOR® Core (@glastor-dev)"
+repository-code: "https://github.com/glastor-core/specter"
+url: "https://glastor.es"
+license: MIT
+version: "0.1.0"
+date-released: "2026-11-07"
+keywords:
+  - rust
+  - semver
+  - api-diff
+  - ast
+  - github-actions
+  - devsecops
+  - glastor-core
+  - vortex
+  - byte-gauge
+  - medusa
+

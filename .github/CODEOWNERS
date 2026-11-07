@@ -1,0 +1,7 @@
+# GLASTOR® Core Ownership & Mandatory Review Matrix
+* @glastor-dev
+/.github/ @glastor-dev
+/src/ @glastor-dev
+/Cargo.toml @glastor-dev
+/action.yml @glastor-dev
+

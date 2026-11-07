@@ -1,0 +1,196 @@
+name: "GLASTOR® Specter — Polyglot AST API Contract & SemVer Gatekeeper"
+description: "Zero-Compiler Rust AST API Contract Differ, Trojan Breaking-Change Detector, SARIF 2.1.0 & CycloneDX SBOM Engine. Complements Vortex, Byte-Gauge & Medusa."
+author: "Andrés Antonio Cardoso — GLASTOR® Core (@glastor-dev)"
+branding:
+  icon: "git-pull-request"
+  color: "purple"
+
+inputs:
+  head-dir:
+    description: "Path to the current (HEAD) source directory to audit"
+    required: false
+    default: "."
+  base-dir:
+    description: "Optional path to a base source directory to compare against"
+    required: false
+    default: ""
+  base-ref:
+    description: "Optional Git reference (e.g., 'origin/main' or 'HEAD~1') to extract base API contract from"
+    required: false
+    default: ""
+  baseline-json:
+    description: "Optional path to a previously saved ContractSnapshot JSON baseline"
+    required: false
+    default: ""
+  save-snapshot:
+    description: "Optional path to save the current HEAD ContractSnapshot JSON"
+    required: false
+    default: ".specter/snapshot.json"
+  commit-message:
+    description: "Commit message or PR title to verify against AST contract impact (Trojan Commit Guard)"
+    required: false
+    default: ${{ github.event.pull_request.title || github.event.head_commit.message }}
+  fail-on-breaking:
+    description: "Fail the workflow if any MAJOR breaking API change is detected (true/false)"
+    required: false
+    default: "false"
+  fail-on-trojan:
+    description: "Fail the workflow if a Trojan Breaking Change is detected (MAJOR change disguised as fix/feat/chore)"
+    required: false
+    default: "true"
+  strict-semver:
+    description: "Also fail if a MINOR public symbol addition is disguised as a PATCH commit (true/false)"
+    required: false
+    default: "false"
+  output-json:
+    description: "Optional path to export JSON audit telemetry"
+    required: false
+    default: "specter-report.json"
+  output-sarif:
+    description: "Optional path to export SARIF 2.1.0 report for GitHub Security (Code Scanning)"
+    required: false
+    default: ""
+  output-sbom:
+    description: "Optional path to export CycloneDX 1.5 JSON API Contract SBOM"
+    required: false
+    default: ""
+  post-pr-comment:
+    description: "Automatically create or update a Sticky Comment on Pull Requests with the contract audit summary"
+    required: false
+    default: "true"
+  github-token:
+    description: "GitHub Token used to post/update Pull Request Sticky Comments"
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  status:
+    description: "Audit verdict (passed, warning, failed)"
+    value: ${{ steps.run-audit.outputs.status }}
+  semver_bump:
+    description: "Mathematically required SemVer bump (major, minor, patch)"
+    value: ${{ steps.run-audit.outputs.semver_bump }}
+  base_fingerprint:
+    description: "SHA-256 cryptographic fingerprint of the base public API contract"
+    value: ${{ steps.run-audit.outputs.base_fingerprint }}
+  head_fingerprint:
+    description: "SHA-256 cryptographic fingerprint of the head public API contract"
+    value: ${{ steps.run-audit.outputs.head_fingerprint }}
+  contract_mutated:
+    description: "Whether the public API surface fingerprint changed (true/false)"
+    value: ${{ steps.run-audit.outputs.contract_mutated }}
+  breaking_count:
+    description: "Total number of MAJOR breaking API contract mutations"
+    value: ${{ steps.run-audit.outputs.breaking_count }}
+  minor_count:
+    description: "Total number of MINOR backward-compatible API additions"
+    value: ${{ steps.run-audit.outputs.minor_count }}
+  symbols_base:
+    description: "Total exported public symbols in base snapshot"
+    value: ${{ steps.run-audit.outputs.symbols_base }}
+  symbols_head:
+    description: "Total exported public symbols in head snapshot"
+    value: ${{ steps.run-audit.outputs.symbols_head }}
+  commit_intent:
+    description: "Declared SemVer intent parsed from Conventional Commit (major, minor, patch, unverified)"
+    value: ${{ steps.run-audit.outputs.commit_intent }}
+  trojan_detected:
+    description: "Whether an undeclared Trojan Breaking Change was caught (true/false)"
+    value: ${{ steps.run-audit.outputs.trojan_detected }}
+  files_scanned:
+    description: "Total number of source files scanned"
+    value: ${{ steps.run-audit.outputs.files_scanned }}
+  languages:
+    description: "Comma-separated list of detected languages (Rust, TypeScript)"
+    value: ${{ steps.run-audit.outputs.languages }}
+  duration_ms:
+    description: "Scan execution time in milliseconds"
+    value: ${{ steps.run-audit.outputs.duration_ms }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Try downloading pre-compiled Release binary (0s FinOps Fast-Path)
+      id: prebuilt
+      shell: bash
+      env:
+        ACTION_DIR: ${{ github.action_path }}
+        RUNNER_OS_NAME: ${{ runner.os }}
+        RUNNER_ARCH_NAME: ${{ runner.arch }}
+      run: |
+        mkdir -p "${ACTION_DIR}/target/release"
+        BIN_DEST="${ACTION_DIR}/target/release/specter"
+        ASSET=""
+        if [ "$RUNNER_OS_NAME" = "Linux" ] && [ "$RUNNER_ARCH_NAME" = "X64" ]; then
+          ASSET="specter-linux-x64"
+        elif [ "$RUNNER_OS_NAME" = "Windows" ] && [ "$RUNNER_ARCH_NAME" = "X64" ]; then
+          ASSET="specter-windows-x64.exe"
+          BIN_DEST="${ACTION_DIR}/target/release/specter.exe"
+        elif [ "$RUNNER_OS_NAME" = "macOS" ] && [ "$RUNNER_ARCH_NAME" = "ARM64" ]; then
+          ASSET="specter-macos-arm64"
+        elif [ "$RUNNER_OS_NAME" = "macOS" ] && [ "$RUNNER_ARCH_NAME" = "X64" ]; then
+          ASSET="specter-macos-x64"
+        fi
+
+        if [ -n "$ASSET" ] && curl -fsSL "https://github.com/glastor-core/specter/releases/latest/download/${ASSET}" -o "$BIN_DEST" 2>/dev/null; then
+          chmod +x "$BIN_DEST"
+          echo "downloaded=true" >> "$GITHUB_OUTPUT"
+          echo "⚡ Pre-compiled binary (${ASSET}) downloaded from GitHub Release!"
+        else
+          echo "downloaded=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Cache specter release binary (Fallback)
+      id: cache-bin
+      if: steps.prebuilt.outputs.downloaded != 'true'
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.action_path }}/target/release/specter*
+        key: glastor-specter-bin-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/Cargo.lock', github.action_path), format('{0}/src/**/*.rs', github.action_path)) }}
+
+    - name: Build specter from source (Fallback if not prebuilt or cached)
+      if: steps.prebuilt.outputs.downloaded != 'true' && steps.cache-bin.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: cargo build --release --locked
+
+    - name: Execute Specter API Contract & SemVer Audit
+      id: run-audit
+      shell: bash
+      env:
+        ACTION_DIR: ${{ github.action_path }}
+        INPUT_HEAD_DIR: ${{ inputs.head-dir }}
+        INPUT_BASE_DIR: ${{ inputs.base-dir }}
+        INPUT_BASE_REF: ${{ inputs.base-ref }}
+        INPUT_BASELINE_JSON: ${{ inputs.baseline-json }}
+        INPUT_SAVE_SNAPSHOT: ${{ inputs.save-snapshot }}
+        INPUT_COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        INPUT_FAIL_ON_BREAKING: ${{ inputs.fail-on-breaking }}
+        INPUT_FAIL_ON_TROJAN: ${{ inputs.fail-on-trojan }}
+        INPUT_STRICT_SEMVER: ${{ inputs.strict-semver }}
+        INPUT_OUTPUT_JSON: ${{ inputs.output-json }}
+        INPUT_OUTPUT_SARIF: ${{ inputs.output-sarif }}
+        INPUT_OUTPUT_SBOM: ${{ inputs.output-sbom }}
+        INPUT_OUTPUT_MARKDOWN: ".specter/sticky-comment.md"
+      run: "${ACTION_DIR}/target/release/specter"
+
+    - name: Post or Update Pull Request Sticky Comment
+      if: always() && inputs.post-pr-comment == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPO_FULL: ${{ github.repository }}
+        PR_NUM: ${{ github.event.pull_request.number }}
+      run: |
+        if [ ! -f ".specter/sticky-comment.md" ] || [ -z "$PR_NUM" ]; then
+          exit 0
+        fi
+        EXISTING_ID=$(gh api "repos/${REPO_FULL}/issues/${PR_NUM}/comments" \
+          --jq '.[] | select(.body | contains("<!-- glastor-specter-sticky-comment -->")) | .id' | head -n 1 || true)
+        if [ -n "$EXISTING_ID" ]; then
+          gh api -X PATCH "repos/${REPO_FULL}/issues/comments/${EXISTING_ID}" \
+            -F body=@.specter/sticky-comment.md >/dev/null 2>&1 || true
+        else
+          gh pr comment "$PR_NUM" --repo "$REPO_FULL" --body-file .specter/sticky-comment.md >/dev/null 2>&1 || true
+        fi
+
