@@ -1,5 +1,5 @@
 name: "GLASTOR® Specter — Polyglot AST API Contract & SemVer Gatekeeper"
-description: "Zero-Compiler Rust AST API Contract Differ, Trojan Breaking-Change Detector, SARIF 2.1.0 & CycloneDX SBOM Engine. Complements Vortex, Byte-Gauge & Medusa."
+description: "Zero-Compiler Polyglot AST API Contract Differ, Trojan Breaking-Change Guard & SemVer Gatekeeper (SARIF & SBOM)."
 author: "Andrés Antonio Cardoso — GLASTOR® Core (@glastor-dev)"
 branding:
   icon: "git-pull-request"
