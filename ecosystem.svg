@@ -1,0 +1,382 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 400" width="100%" height="100%" style="background:#080b11; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+  <defs>
+    <!-- Background Grid Pattern -->
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#1e2638" opacity="0.6"/>
+    </pattern>
+
+    <!-- Glow Filters -->
+    <filter id="glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glow-purple" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glow-specter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.65"/>
+    </filter>
+
+    <!-- Node Gradient Borders & Fills -->
+    <linearGradient id="bg-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141923" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#0d111a" stop-opacity="0.96"/>
+    </linearGradient>
+
+    <!-- Stage 1 Nemesis: Cyan -->
+    <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <!-- Stage 2 Vortex: Violet -->
+    <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+
+    <!-- Stage 3 Specter: Indigo/Electric Blue (Hero Highlight) -->
+    <linearGradient id="grad-indigo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#818cf8"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+
+    <!-- Stage 4 Byte-Gauge: Amber/Orange -->
+    <linearGradient id="grad-amber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <!-- Stage 5 Medusa: Emerald -->
+    <linearGradient id="grad-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Connector Gradients -->
+    <linearGradient id="conn-1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="conn-2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="conn-3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <linearGradient id="conn-4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow-1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrow-2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1"/>
+    </marker>
+    <marker id="arrow-3" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#ea580c"/>
+    </marker>
+    <marker id="arrow-4" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#059669"/>
+    </marker>
+  </defs>
+
+  <!-- Background Grid -->
+  <rect width="1320" height="400" fill="#080b11"/>
+  <rect width="1320" height="400" fill="url(#grid)"/>
+
+  <!-- Subtle Ambient Glows -->
+  <circle cx="660" cy="225" r="160" fill="#6366f1" opacity="0.12" filter="url(#glow-specter)"/>
+  <circle cx="150" cy="225" r="120" fill="#0284c7" opacity="0.08" filter="url(#glow-cyan)"/>
+  <circle cx="1170" cy="225" r="120" fill="#059669" opacity="0.08" filter="url(#glow-cyan)"/>
+
+  <!-- ================= TOP HEADER BAR ================= -->
+  <g transform="translate(50, 24)">
+    <!-- Org Badge -->
+    <rect x="0" y="0" width="138" height="26" rx="13" fill="#131926" stroke="#253046" stroke-width="1"/>
+    <circle cx="13" cy="13" r="5" fill="#38bdf8"/>
+    <text x="26" y="17" fill="#94a3b8" font-size="11" font-weight="700" letter-spacing="1">GLASTOR® CORE</text>
+
+    <!-- Main Title -->
+    <text x="154" y="18" fill="#f8fafc" font-size="15" font-weight="700" letter-spacing="0.5">Continuous Zero-Trust Verification &amp; Edge Delivery Pipeline</text>
+
+    <!-- Right Pillar Badge -->
+    <rect x="1040" y="0" width="180" height="26" rx="13" fill="#141a29" stroke="#312e81" stroke-width="1"/>
+    <text x="1055" y="17" fill="#a5b4fc" font-size="11" font-weight="600" letter-spacing="0.5">🔒 Deterministic DevSecOps</text>
+  </g>
+
+  <!-- ================= INTER-NODE CONNECTORS ================= -->
+  <!-- Connector 1: Nemesis -> Vortex -->
+  <g>
+    <line x1="250" y1="225" x2="300" y2="225" stroke="url(#conn-1)" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#arrow-1)"/>
+    <circle cx="275" cy="225" r="3" fill="#c084fc"/>
+  </g>
+
+  <!-- Connector 2: Vortex -> Specter -->
+  <g>
+    <line x1="505" y1="225" x2="555" y2="225" stroke="url(#conn-2)" stroke-width="3" marker-end="url(#arrow-2)"/>
+    <circle cx="530" cy="225" r="3.5" fill="#818cf8"/>
+  </g>
+
+  <!-- Connector 3: Specter -> Byte-Gauge -->
+  <g>
+    <line x1="760" y1="225" x2="810" y2="225" stroke="url(#conn-3)" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#arrow-3)"/>
+    <circle cx="785" cy="225" r="3" fill="#fb923c"/>
+  </g>
+
+  <!-- Connector 4: Byte-Gauge -> Medusa -->
+  <g>
+    <line x1="1015" y1="225" x2="1065" y2="225" stroke="url(#conn-4)" stroke-width="2.5" marker-end="url(#arrow-4)"/>
+    <circle cx="1040" cy="225" r="3" fill="#34d399"/>
+  </g>
+
+
+  <!-- ================= NODE 1: NEMESIS ================= -->
+  <g transform="translate(50, 85)" filter="url(#card-shadow)">
+    <!-- Card Base -->
+    <rect width="200" height="260" rx="14" fill="url(#bg-card)" stroke="#1e293b" stroke-width="1.5"/>
+    <!-- Top Accent Bar -->
+    <path d="M 0 14 Q 0 0 14 0 L 186 0 Q 200 0 200 14 L 200 4 L 0 4 Z" fill="url(#grad-cyan)"/>
+    
+    <!-- Stage Pill -->
+    <rect x="16" y="16" width="60" height="20" rx="10" fill="#0369a1" fill-opacity="0.25" stroke="#0284c7" stroke-width="1"/>
+    <text x="26" y="30" fill="#38bdf8" font-size="10" font-weight="800">STAGE 1</text>
+
+    <!-- Icon Graphic: Shield -->
+    <g transform="translate(154, 16)">
+      <circle cx="15" cy="15" r="15" fill="#082f49" stroke="#0284c7" stroke-width="1"/>
+      <path d="M 15 8 L 22 11 L 22 17 C 22 21 15 24 15 24 C 15 24 8 21 8 17 L 8 11 Z" fill="none" stroke="#38bdf8" stroke-width="1.6" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Title & Repo -->
+    <text x="16" y="66" fill="#f1f5f9" font-size="16" font-weight="700">nemesis</text>
+    <text x="16" y="82" fill="#64748b" font-size="11" font-weight="500">glastor-core/nemesis</text>
+
+    <!-- Subtitle Role -->
+    <rect x="16" y="96" width="168" height="30" rx="6" fill="#0c1929" stroke="#164e63" stroke-width="1"/>
+    <text x="24" y="115" fill="#38bdf8" font-size="11" font-weight="600">Governance &amp; SAST</text>
+
+    <!-- Feature Bullets -->
+    <g transform="translate(16, 142)">
+      <circle cx="4" cy="6" r="2.5" fill="#0284c7"/>
+      <text x="14" y="10" fill="#94a3b8" font-size="11" font-weight="400">Repo Hygiene &amp; Rules</text>
+
+      <circle cx="4" cy="28" r="2.5" fill="#0284c7"/>
+      <text x="14" y="32" fill="#94a3b8" font-size="11" font-weight="400">Secret Prevention Gate</text>
+
+      <circle cx="4" cy="50" r="2.5" fill="#0284c7"/>
+      <text x="14" y="54" fill="#94a3b8" font-size="11" font-weight="400">Zero-Trust Compliance</text>
+    </g>
+
+    <!-- Footer Tag -->
+    <line x1="16" y1="218" x2="184" y2="218" stroke="#1e293b" stroke-width="1"/>
+    <text x="16" y="238" fill="#475569" font-size="10" font-weight="600" letter-spacing="0.5">DENO 2 · TYPESCRIPT</text>
+  </g>
+
+
+  <!-- ================= NODE 2: VORTEX ================= -->
+  <g transform="translate(305, 85)" filter="url(#card-shadow)">
+    <!-- Card Base -->
+    <rect width="200" height="260" rx="14" fill="url(#bg-card)" stroke="#1e293b" stroke-width="1.5"/>
+    <!-- Top Accent Bar -->
+    <path d="M 0 14 Q 0 0 14 0 L 186 0 Q 200 0 200 14 L 200 4 L 0 4 Z" fill="url(#grad-purple)"/>
+
+    <!-- Stage Pill -->
+    <rect x="16" y="16" width="60" height="20" rx="10" fill="#581c87" fill-opacity="0.3" stroke="#7c3aed" stroke-width="1"/>
+    <text x="26" y="30" fill="#c084fc" font-size="10" font-weight="800">STAGE 2</text>
+
+    <!-- Icon Graphic: Cyclone / AST Graph -->
+    <g transform="translate(154, 16)">
+      <circle cx="15" cy="15" r="15" fill="#2e1065" stroke="#7c3aed" stroke-width="1"/>
+      <path d="M 15 9 A 6 6 0 0 1 21 15 M 15 21 A 6 6 0 0 1 9 15 M 15 12 A 3 3 0 0 1 18 15" fill="none" stroke="#c084fc" stroke-width="1.6" stroke-linecap="round"/>
+    </g>
+
+    <!-- Title & Repo -->
+    <text x="16" y="66" fill="#f1f5f9" font-size="16" font-weight="700">vortex</text>
+    <text x="16" y="82" fill="#64748b" font-size="11" font-weight="500">glastor-core/vortex</text>
+
+    <!-- Subtitle Role -->
+    <rect x="16" y="96" width="168" height="30" rx="6" fill="#201138" stroke="#4c1d95" stroke-width="1"/>
+    <text x="24" y="115" fill="#c084fc" font-size="11" font-weight="600">Pre-Build AST Sharding</text>
+
+    <!-- Feature Bullets -->
+    <g transform="translate(16, 142)">
+      <circle cx="4" cy="6" r="2.5" fill="#7c3aed"/>
+      <text x="14" y="10" fill="#94a3b8" font-size="11" font-weight="400">AST Blast Radius DAG</text>
+
+      <circle cx="4" cy="28" r="2.5" fill="#7c3aed"/>
+      <text x="14" y="32" fill="#94a3b8" font-size="11" font-weight="400">Symbol Barrel Pruning</text>
+
+      <circle cx="4" cy="50" r="2.5" fill="#7c3aed"/>
+      <text x="14" y="54" fill="#94a3b8" font-size="11" font-weight="400">LPT Mathematical Split</text>
+    </g>
+
+    <!-- Footer Tag -->
+    <line x1="16" y1="218" x2="184" y2="218" stroke="#1e293b" stroke-width="1"/>
+    <text x="16" y="238" fill="#475569" font-size="10" font-weight="600" letter-spacing="0.5">PREDICTIVE CI · &lt;30MS</text>
+  </g>
+
+
+  <!-- ================= NODE 3: SPECTER (HERO COMPONENT) ================= -->
+  <g transform="translate(560, 75)" filter="url(#card-shadow)">
+    <!-- Halo Pulse Outer Border for Active Repo -->
+    <rect x="-3" y="-3" width="206" height="286" rx="17" fill="none" stroke="url(#grad-indigo)" stroke-width="2" opacity="0.9"/>
+
+    <!-- Card Base with Indigo Tint -->
+    <rect width="200" height="280" rx="14" fill="#0f1424" stroke="#4f46e5" stroke-width="1.8"/>
+
+    <!-- Top Glow Header -->
+    <path d="M 0 14 Q 0 0 14 0 L 186 0 Q 200 0 200 14 L 200 6 L 0 6 Z" fill="url(#grad-indigo)"/>
+
+    <!-- Stage Pill & Hero Badge -->
+    <rect x="16" y="16" width="60" height="20" rx="10" fill="#312e81" stroke="#6366f1" stroke-width="1"/>
+    <text x="26" y="30" fill="#a5b4fc" font-size="10" font-weight="800">STAGE 3</text>
+
+    <rect x="82" y="16" width="62" height="20" rx="10" fill="#4338ca" fill-opacity="0.4" stroke="#818cf8" stroke-width="0.8"/>
+    <text x="90" y="30" fill="#c7d2fe" font-size="9" font-weight="700">CORE HUB</text>
+
+    <!-- Icon Graphic: API Contract / Diff Gate -->
+    <g transform="translate(154, 16)">
+      <circle cx="15" cy="15" r="15" fill="#1e1b4b" stroke="#6366f1" stroke-width="1.2"/>
+      <path d="M 11 11 L 19 11 M 11 15 L 19 15 M 11 19 L 16 19" fill="none" stroke="#a5b4fc" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+
+    <!-- Title & Repo -->
+    <text x="16" y="68" fill="#ffffff" font-size="18" font-weight="800" letter-spacing="0.2">specter</text>
+    <text x="16" y="85" fill="#818cf8" font-size="11" font-weight="600">glastor-core/specter</text>
+
+    <!-- Subtitle Role -->
+    <rect x="14" y="98" width="172" height="34" rx="6" fill="#1e1b4b" fill-opacity="0.8" stroke="#4338ca" stroke-width="1"/>
+    <text x="22" y="114" fill="#e0e7ff" font-size="11" font-weight="700">Contract &amp; SemVer Gate</text>
+    <text x="22" y="126" fill="#818cf8" font-size="9.5" font-weight="500">Zero-Compiler AST Differ</text>
+
+    <!-- Feature Bullets -->
+    <g transform="translate(16, 148)">
+      <circle cx="4" cy="6" r="2.5" fill="#818cf8"/>
+      <text x="14" y="10" fill="#e2e8f0" font-size="11" font-weight="500">Contract SHA-256 Digest</text>
+
+      <circle cx="4" cy="28" r="2.5" fill="#818cf8"/>
+      <text x="14" y="32" fill="#e2e8f0" font-size="11" font-weight="500">Trojan Breaking Guard</text>
+
+      <circle cx="4" cy="50" r="2.5" fill="#818cf8"/>
+      <text x="14" y="54" fill="#e2e8f0" font-size="11" font-weight="500">SARIF 2.1 &amp; CycloneDX</text>
+    </g>
+
+    <!-- Highlighted Footer Tag -->
+    <line x1="16" y1="230" x2="184" y2="230" stroke="#312e81" stroke-width="1"/>
+    <rect x="16" y="242" width="168" height="22" rx="4" fill="#1e1b4b" stroke="#3730a3" stroke-width="1"/>
+    <text x="26" y="257" fill="#a5b4fc" font-size="10" font-weight="700" letter-spacing="0.5">⚡ RUST 2024 · &lt;5MS LATENCY</text>
+  </g>
+
+
+  <!-- ================= NODE 4: BYTE-GAUGE ================= -->
+  <g transform="translate(815, 85)" filter="url(#card-shadow)">
+    <!-- Card Base -->
+    <rect width="200" height="260" rx="14" fill="url(#bg-card)" stroke="#1e293b" stroke-width="1.5"/>
+    <!-- Top Accent Bar -->
+    <path d="M 0 14 Q 0 0 14 0 L 186 0 Q 200 0 200 14 L 200 4 L 0 4 Z" fill="url(#grad-amber)"/>
+
+    <!-- Stage Pill -->
+    <rect x="16" y="16" width="60" height="20" rx="10" fill="#7c2d12" fill-opacity="0.3" stroke="#ea580c" stroke-width="1"/>
+    <text x="26" y="30" fill="#fb923c" font-size="10" font-weight="800">STAGE 4</text>
+
+    <!-- Icon Graphic: Gauge / Binary Checksec -->
+    <g transform="translate(154, 16)">
+      <circle cx="15" cy="15" r="15" fill="#431407" stroke="#ea580c" stroke-width="1"/>
+      <path d="M 10 19 A 7 7 0 1 1 20 19 L 15 15 Z" fill="none" stroke="#fb923c" stroke-width="1.6" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Title & Repo -->
+    <text x="16" y="66" fill="#f1f5f9" font-size="16" font-weight="700">byte-gauge</text>
+    <text x="16" y="82" fill="#64748b" font-size="11" font-weight="500">glastor-core/byte-gauge</text>
+
+    <!-- Subtitle Role -->
+    <rect x="16" y="96" width="168" height="30" rx="6" fill="#271406" stroke="#7c2d12" stroke-width="1"/>
+    <text x="24" y="115" fill="#fb923c" font-size="11" font-weight="600">Post-Build Binary Audit</text>
+
+    <!-- Feature Bullets -->
+    <g transform="translate(16, 142)">
+      <circle cx="4" cy="6" r="2.5" fill="#ea580c"/>
+      <text x="14" y="10" fill="#94a3b8" font-size="11" font-weight="400">SIMD Binary Inspection</text>
+
+      <circle cx="4" cy="28" r="2.5" fill="#ea580c"/>
+      <text x="14" y="32" fill="#94a3b8" font-size="11" font-weight="400">Checksec &amp; Hardening</text>
+
+      <circle cx="4" cy="50" r="2.5" fill="#ea580c"/>
+      <text x="14" y="54" fill="#94a3b8" font-size="11" font-weight="400">ELF/PE/Mach-O/Wasm</text>
+    </g>
+
+    <!-- Footer Tag -->
+    <line x1="16" y1="218" x2="184" y2="218" stroke="#1e293b" stroke-width="1"/>
+    <text x="16" y="238" fill="#475569" font-size="10" font-weight="600" letter-spacing="0.5">RUST SIMD · PARALLEL</text>
+  </g>
+
+
+  <!-- ================= NODE 5: MEDUSA ================= -->
+  <g transform="translate(1070, 85)" filter="url(#card-shadow)">
+    <!-- Card Base -->
+    <rect width="200" height="260" rx="14" fill="url(#bg-card)" stroke="#1e293b" stroke-width="1.5"/>
+    <!-- Top Accent Bar -->
+    <path d="M 0 14 Q 0 0 14 0 L 186 0 Q 200 0 200 14 L 200 4 L 0 4 Z" fill="url(#grad-emerald)"/>
+
+    <!-- Stage Pill -->
+    <rect x="16" y="16" width="60" height="20" rx="10" fill="#064e3b" fill-opacity="0.3" stroke="#059669" stroke-width="1"/>
+    <text x="26" y="30" fill="#34d399" font-size="10" font-weight="800">STAGE 5</text>
+
+    <!-- Icon Graphic: Edge Gateway / Globe -->
+    <g transform="translate(154, 16)">
+      <circle cx="15" cy="15" r="15" fill="#022c22" stroke="#059669" stroke-width="1"/>
+      <circle cx="15" cy="15" r="7" fill="none" stroke="#34d399" stroke-width="1.4"/>
+      <line x1="8" y1="15" x2="22" y2="15" stroke="#34d399" stroke-width="1.2"/>
+    </g>
+
+    <!-- Title & Repo -->
+    <text x="16" y="66" fill="#f1f5f9" font-size="16" font-weight="700">medusa</text>
+    <text x="16" y="82" fill="#64748b" font-size="11" font-weight="500">glastor-core/medusa</text>
+
+    <!-- Subtitle Role -->
+    <rect x="16" y="96" width="168" height="30" rx="6" fill="#06231a" stroke="#065f46" stroke-width="1"/>
+    <text x="24" y="115" fill="#34d399" font-size="11" font-weight="600">Zero-Trust Edge Gateway</text>
+
+    <!-- Feature Bullets -->
+    <g transform="translate(16, 142)">
+      <circle cx="4" cy="6" r="2.5" fill="#059669"/>
+      <text x="14" y="10" fill="#94a3b8" font-size="11" font-weight="400">Resilient Proxy &amp; Circuit</text>
+
+      <circle cx="4" cy="28" r="2.5" fill="#059669"/>
+      <text x="14" y="32" fill="#94a3b8" font-size="11" font-weight="400">Single-Flight Dedup</text>
+
+      <circle cx="4" cy="50" r="2.5" fill="#059669"/>
+      <text x="14" y="54" fill="#94a3b8" font-size="11" font-weight="400">Edge Caching &amp; Deno KV</text>
+    </g>
+
+    <!-- Footer Tag -->
+    <line x1="16" y1="218" x2="184" y2="218" stroke="#1e293b" stroke-width="1"/>
+    <text x="16" y="238" fill="#475569" font-size="10" font-weight="600" letter-spacing="0.5">DENO DEPLOY · EDGE RUNTIME</text>
+  </g>
+
+
+  <!-- ================= BOTTOM PIPELINE FOOTER ================= -->
+  <g transform="translate(50, 365)">
+    <circle cx="6" cy="6" r="3" fill="#10b981"/>
+    <text x="18" y="10" fill="#64748b" font-size="11" font-weight="500">
+      Zero External Supply-Chain Risk · 100% Deterministic Reproducibility · Native GitHub Actions &amp; CLI Matrix
+    </text>
+
+    <text x="1220" y="10" text-anchor="end" fill="#475569" font-size="11" font-weight="600">
+      © GLASTOR® Core Ecosystem Architecture
+    </text>
+  </g>
+</svg>
+

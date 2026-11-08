@@ -24,13 +24,9 @@ Modern CI/CD pipelines blindly trust human or AI-authored commit messages (`fix:
 
 ## 🏗️ Ecosystem Synergy (`GLASTOR® Core`)
 
-```mermaid
-flowchart LR
-    N["1. glastor-core/nemesis<br/>(Governance & SAST)"] --> V["2. glastor-core/vortex<br/>(Pre-Build AST & Test Sharding)"]
-    V --> S["3. glastor-core/specter<br/>(API Contract & SemVer Gatekeeper)"]
-    S --> B["4. glastor-core/byte-gauge<br/>(Post-Build SIMD Binary Auditor)"]
-    B --> M["5. glastor-core/medusa<br/>(Zero-Trust Edge Gateway)"]
-```
+<p align="center">
+  <img src="./image.svg" alt="GLASTOR® Core — Continuous Zero-Trust Verification & Edge Delivery Pipeline" width="100%">
+</p>
 
 | Stage | Repository | Role in the Pipeline |
 | :--- | :--- | :--- |
@@ -122,5 +118,6 @@ Show the community that your public API contract and SemVer releases are mathema
 ## 📄 License & Corporate Governance
 
 Licensed under the [MIT License](./LICENSE).
-Maintained by **Andrés Antonio Cardoso — GLASTOR® Core (@glastor-dev)** — [https://glastor.es](https://glastor.es) (`ventas@glastor.es`).
+
+© 2010–2026 [GLASTOR®](https://glastor.es/) (INPI Reg. 4559568 & 4559567) • Dual-Hub Operations (Spain & Argentina · Factura E) • Led by [@glastor-dev](https://github.com/glastor-dev) (GitHub Developer Program Member).
 
