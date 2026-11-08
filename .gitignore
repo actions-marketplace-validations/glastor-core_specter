@@ -1,8 +1,10 @@
 /target
 /dist
 /.specter
+/.byte-gauge
 *.audit.json
 *.sarif
 *.cdx.json
 specter-report.json
+byte-gauge-report.json
 

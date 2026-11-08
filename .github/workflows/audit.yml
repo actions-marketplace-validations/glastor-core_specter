@@ -54,6 +54,19 @@ jobs:
       - name: Build optimized release binary (stripped + LTO)
         run: cargo build --release --locked
 
+      - name: Run GLASTOR® Byte-Gauge SIMD Binary & Hardening Audit
+        id: byte-gauge-audit
+        uses: glastor-core/byte-gauge@v1
+        with:
+          file-path: "./target/release/specter"
+          max-size-mb: "10.0"
+          fail-on-debug: "true"
+          scan-entropy-secrets: "true"
+          output-json: ".byte-gauge/byte-gauge-audit.json"
+          output-sarif: ".byte-gauge/byte-gauge.sarif"
+          output-sbom: ".byte-gauge/byte-gauge.cdx.json"
+          post-pr-comment: "true"
+
       - name: Restore previous API Contract Snapshot baseline
         uses: actions/cache/restore@v4
         with:
@@ -126,6 +139,9 @@ jobs:
             .specter/current-snapshot.json
             .specter/specter.sarif
             .specter/specter.cdx.json
+            .byte-gauge/byte-gauge-audit.json
+            .byte-gauge/byte-gauge.sarif
+            .byte-gauge/byte-gauge.cdx.json
           retention-days: 14
 
   # Dogfooding del ecosistema GLASTOR® Core con glastor-core/nemesis
