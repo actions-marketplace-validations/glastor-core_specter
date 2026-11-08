@@ -107,6 +107,18 @@ specter \
 
 ---
 
+## 🏅 Official Status Badge (Add to Your README)
+
+Show the community that your public API contract and SemVer releases are mathematically verified by **GLASTOR® Specter**. Copy and paste this snippet into your repository's `README.md`:
+
+[![API Contract: Specter](https://img.shields.io/badge/API%20Contract-Specter%20AST-8b5cf6?style=for-the-badge)](https://github.com/glastor-core/specter)
+
+```markdown
+[![API Contract: Specter](https://img.shields.io/badge/API%20Contract-Specter%20AST-8b5cf6?style=for-the-badge)](https://github.com/glastor-core/specter)
+```
+
+---
+
 ## 📄 License & Corporate Governance
 
 Licensed under the [MIT License](./LICENSE).

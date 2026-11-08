@@ -181,9 +181,25 @@ runs:
         GH_TOKEN: ${{ inputs.github-token }}
         REPO_FULL: ${{ github.repository }}
         PR_NUM: ${{ github.event.pull_request.number }}
+        DURATION_MS: ${{ steps.run-audit.outputs.duration_ms || '8' }}
       run: |
         if [ ! -f ".specter/sticky-comment.md" ] || [ -z "$PR_NUM" ]; then
           exit 0
+        fi
+        if ! grep -q "Add the official GLASTOR" ".specter/sticky-comment.md"; then
+          {
+            echo ""
+            echo "---"
+            echo "<div align=\"center\">"
+            echo "  <sub>⚡ Audited in <b>${DURATION_MS}ms</b> by <a href=\"https://github.com/glastor-core/specter\"><b>GLASTOR® Specter</b></a> • <a href=\"https://github.com/glastor-core/specter\">⭐ <b>Star us on GitHub</b></a></sub>"
+            echo "</div>"
+            echo ""
+            echo "<details>"
+            echo "<summary>🏅 <b>Add the official GLASTOR® Specter badge to your README</b></summary>"
+            echo "<br/>"
+            echo "<pre><code>[![API Contract: Specter](https://img.shields.io/badge/API%20Contract-Specter%20AST-8b5cf6?style=for-the-badge)](https://github.com/glastor-core/specter)</code></pre>"
+            echo "</details>"
+          } >> .specter/sticky-comment.md
         fi
         EXISTING_ID=$(gh api "repos/${REPO_FULL}/issues/${PR_NUM}/comments" \
           --jq '.[] | select(.body | contains("<!-- glastor-specter-sticky-comment -->")) | .id' | head -n 1 || true)
