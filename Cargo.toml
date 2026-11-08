@@ -1,6 +1,6 @@
 [package]
-name = "specter"
-version = "0.1.0"
+name = "specter-cli"
+version = "0.2.0"
 edition = "2024"
 authors = ["Andrés Antonio Cardoso <ventas@glastor.es>"]
 description = "GLASTOR® Core — Zero-Compiler Polyglot AST API Contract Differ, Trojan Breaking-Change Detector & Mathematical SemVer Gatekeeper for GitHub Actions (complements @glastor-core/vortex, @glastor-core/byte-gauge & @glastor-core/medusa)"
@@ -9,6 +9,10 @@ repository = "https://github.com/glastor-core/specter"
 license = "MIT"
 keywords = ["github-actions", "semver", "api-diff", "devsecops", "glastor-core"]
 categories = ["command-line-utilities", "development-tools", "parser-implementations"]
+
+[[bin]]
+name = "specter"
+path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0"
