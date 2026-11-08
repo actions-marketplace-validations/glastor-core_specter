@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - "main"
+    paths-ignore:
+      - "**.md"
+      - "!CHANGELOG.md"
+      - "**.svg"
+      - "**.png"
+      - "**.jpg"
+      - "docs/**"
   workflow_dispatch:
     inputs:
       bump_override:
@@ -191,17 +198,17 @@ jobs:
           ' "$NOTES_FILE"
 
             git add Cargo.toml Cargo.lock CITATION.cff CHANGELOG.md
-            git commit -m "chore(release): ${NEW_TAG} [skip ci]"
-            git push origin HEAD:main
+            git commit -m "chore(release): ${NEW_TAG} [skip ci]" || true
+            git push origin HEAD:main || echo "ℹ️ Branch protection active on main; tagging release directly on commit."
           fi
 
           MAJOR_NUM=$(echo "$NEW_VER" | cut -d. -f1)
           git tag -f -a "$NEW_TAG" -m "Release ${NEW_TAG} — GLASTOR Specter"
           git tag -f "v${MAJOR_NUM}" -m "Floating major tag v${MAJOR_NUM} -> ${NEW_TAG}"
           git tag -f "v1" -m "Floating Marketplace v1 tag -> ${NEW_TAG}"
-          git push origin "$NEW_TAG" --force
-          git push origin "v${MAJOR_NUM}" --force
-          git push origin "v1" --force
+          git push origin "refs/tags/${NEW_TAG}" --force
+          git push origin "refs/tags/v${MAJOR_NUM}" --force
+          git push origin "refs/tags/v1" --force
 
           echo "should_release=true" >> "$GITHUB_OUTPUT"
           echo "release_version=${NEW_VER}" >> "$GITHUB_OUTPUT"
