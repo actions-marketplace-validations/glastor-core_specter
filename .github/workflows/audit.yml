@@ -131,7 +131,7 @@ jobs:
 
       - name: Upload JSON, SARIF & CycloneDX SBOM Telemetry Artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: specter-telemetry
           path: |
