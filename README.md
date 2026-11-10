@@ -5,6 +5,9 @@
 **Zero-Compiler Polyglot AST API Contract Differ, Trojan Breaking-Change Detector & Mathematical SemVer Gatekeeper in Rust**
 
 [![CI & API Contract Audit](https://github.com/glastor-core/specter/actions/workflows/audit.yml/badge.svg)](https://github.com/glastor-core/specter/actions/workflows/audit.yml)
+[![crates.io version](https://img.shields.io/crates/v/specter-cli?style=flat-square&color=orange&logo=rust)](https://crates.io/crates/specter-cli)
+[![crates.io downloads](https://img.shields.io/crates/d/specter-cli?style=flat-square&color=blue&logo=rust)](https://crates.io/crates/specter-cli)
+[![Homebrew Tap](https://img.shields.io/badge/Homebrew-brew_install_specter-orange?style=flat-square&logo=homebrew)](https://github.com/glastor-core/homebrew-tap)
 [![Release & SLSA Provenance](https://github.com/glastor-core/specter/actions/workflows/release.yml/badge.svg)](https://github.com/glastor-core/specter/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Rust Edition 2024](https://img.shields.io/badge/Rust-2024_Edition-orange.svg)](https://www.rust-lang.org/)
