@@ -12,6 +12,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Rust Edition 2024](https://img.shields.io/badge/Rust-2024_Edition-orange.svg)](https://www.rust-lang.org/)
 [![GLASTOR Core](https://img.shields.io/badge/GLASTOR%C2%AE_Core-Enterprise_DevSecOps-8A2BE2)](https://glastor.es)
+<br>
+[![Star on GitHub](https://img.shields.io/github/stars/glastor-core/specter?style=social)](https://github.com/glastor-core/specter)
+[![Follow @glastor-dev](https://img.shields.io/github/followers/glastor-dev?label=Follow%20%40glastor-dev&style=social)](https://github.com/glastor-dev)
 
 </div>
 
@@ -115,6 +118,18 @@ Show the community that your public API contract and SemVer releases are mathema
 ```markdown
 [![API Contract: Specter](https://img.shields.io/badge/API%20Contract-Specter%20AST-8b5cf6?style=for-the-badge)](https://github.com/glastor-core/specter)
 ```
+
+---
+
+## ⭐ Star History
+
+<div align="center">
+
+[![Star History Chart](https://api.star-history.com/svg?repos=glastor-core/specter&type=Date)](https://star-history.com/#glastor-core/specter&Date)
+
+*If you find Specter useful, please consider starring the repository and following [@glastor-dev](https://github.com/glastor-dev) on GitHub!*
+
+</div>
 
 ---
 

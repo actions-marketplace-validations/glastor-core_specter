@@ -6,6 +6,7 @@ authors = ["Andrés Antonio Cardoso <ventas@glastor.es>"]
 description = "GLASTOR® Core — Zero-Compiler Polyglot AST API Contract Differ, Trojan Breaking-Change Detector & Mathematical SemVer Gatekeeper for GitHub Actions (complements @glastor-core/vortex, @glastor-core/byte-gauge & @glastor-core/medusa)"
 homepage = "https://glastor.es"
 repository = "https://github.com/glastor-core/specter"
+documentation = "https://docs.rs/specter-cli"
 license = "MIT"
 keywords = ["github-actions", "semver", "api-diff", "devsecops", "glastor-core"]
 categories = ["command-line-utilities", "development-tools", "parser-implementations"]
