@@ -114,7 +114,7 @@ jobs:
 
       - name: Upload SARIF 2.1.0 report to GitHub Security (Code Scanning)
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         continue-on-error: true
         with:
           sarif_file: .specter/specter.sarif
