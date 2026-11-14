@@ -178,9 +178,10 @@ jobs:
           p = pathlib.Path("Cargo.lock")
           if p.exists():
               txt = p.read_text()
-              txt = re.sub(r"(name = \"specter\"\nversion = )\"[^\"]+\"", f"\\1\"{ver}\"", txt, count=1)
+              txt = re.sub(r"(name = \"(specter|specter-cli)\"\r?\nversion = )\"[^\"]+\"", f"\\1\"{ver}\"", txt, count=1)
               p.write_text(txt)
           ' "$NEW_VER"
+            cargo check --offline 2>/dev/null || true
 
             python3 -c '
           import pathlib, sys
