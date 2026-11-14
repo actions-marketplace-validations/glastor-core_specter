@@ -39,6 +39,19 @@ Este proyecto se adhiere a:
 
 ---
 
+## [0.2.1] - 2026-11-14
+
+### ✨ Added
+- **Anotaciones Nativas en GitHub Actions PRs (`::error`, `::notice`)**:
+  - Emisión de comandos de flujo de trabajo de GitHub para pintar advertencias y errores inline directamente sobre las líneas de código afectadas en los Pull Requests.
+- **Modo CLI Interactivo con Colores ANSI**:
+  - Nuevo formateador terminal para la CLI con banderas `--format <auto|text|markdown|json>` y `--color <auto|always|never>`.
+  - Muestra un diff visual estilizado con status, conteo de mutaciones y antes/después de firmas públicas.
+- **Enriquecimiento de SARIF 2.1.0 para GitHub Security (Code Scanning)**:
+  - Atributos `defaultConfiguration.level` en las 13 reglas (SPC001 a SPC013) para categorización y triaje nativo en la pestaña Security.
+
+---
+
 ## [0.1.0] - 2026-11-07
 
 **Nombre del Release:** "Initial Polyglot AST API Contract Differ, Trojan Commit

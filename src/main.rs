@@ -13,7 +13,7 @@ use extractor::{
 };
 use report::{
     AuditVerdict, SpecterAuditReport, emit_github_telemetry, render_markdown_report,
-    write_cyclonedx_sbom, write_sarif_report,
+    render_terminal_colored_diff, write_cyclonedx_sbom, write_sarif_report,
 };
 use std::fs;
 use std::path::Path;
@@ -79,6 +79,14 @@ pub struct CliArgs {
     /// Optional path to export Markdown report for PR Sticky Comments
     #[arg(long, env = "INPUT_OUTPUT_MARKDOWN", default_value = "")]
     pub output_markdown: String,
+
+    /// Optional format for stdout report: 'auto', 'text', 'markdown', or 'json'
+    #[arg(long, env = "INPUT_FORMAT", default_value = "auto")]
+    pub format: String,
+
+    /// Color mode for terminal diff: 'auto', 'always', or 'never'
+    #[arg(long, env = "INPUT_COLOR", default_value = "auto")]
+    pub color: String,
 }
 
 fn main() -> ExitCode {
@@ -163,7 +171,22 @@ fn run() -> Result<ExitCode> {
     };
 
     let markdown = render_markdown_report(&report);
-    println!("{}", markdown);
+
+    let is_ci = std::env::var("CI").is_ok() || std::env::var("GITHUB_ACTIONS").is_ok();
+    let format = args.format.to_lowercase();
+    let use_color = match args.color.to_lowercase().as_str() {
+        "always" => true,
+        "never" => false,
+        _ => !is_ci,
+    };
+
+    if format == "json" {
+        println!("{}", serde_json::to_string_pretty(&report)?);
+    } else if format == "markdown" || (format == "auto" && is_ci) {
+        println!("{}", markdown);
+    } else {
+        println!("{}", render_terminal_colored_diff(&report, use_color));
+    }
 
     if !args.output_markdown.trim().is_empty() {
         let md_path = Path::new(args.output_markdown.trim());
