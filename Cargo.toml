@@ -1,6 +1,6 @@
 [package]
 name = "specter-cli"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 authors = ["Andrés Antonio Cardoso <ventas@glastor.es>"]
 description = "GLASTOR® Core — Zero-Compiler Polyglot AST API Contract Differ, Trojan Breaking-Change Detector & Mathematical SemVer Gatekeeper for GitHub Actions (complements @glastor-core/vortex, @glastor-core/byte-gauge & @glastor-core/medusa)"

@@ -217,6 +217,37 @@ fn render_migration_guide(report: &SpecterAuditReport) -> String {
 
 /// Writes outputs to `$GITHUB_OUTPUT` and `$GITHUB_STEP_SUMMARY` when running in GitHub Actions.
 pub fn emit_github_telemetry(report: &SpecterAuditReport, markdown: &str) -> Result<()> {
+    // 1. Emit GitHub Workflow Command annotations (renders directly on PR code lines)
+    if env::var("GITHUB_ACTIONS").is_ok() {
+        for finding in &report.diff.findings {
+            let line = finding.line.max(1);
+            match finding.impact {
+                SemverImpact::Major => {
+                    println!(
+                        "::error file={},line={},title=[Specter {}] Trojan Breaking Change::{} ('{}' -> '{}')",
+                        finding.file,
+                        line,
+                        finding.code.rule_id(),
+                        finding.reason,
+                        finding.before,
+                        finding.after
+                    );
+                }
+                SemverImpact::Minor => {
+                    println!(
+                        "::notice file={},line={},title=[Specter {}] SemVer Minor Addition::{} ('{}')",
+                        finding.file,
+                        line,
+                        finding.code.rule_id(),
+                        finding.reason,
+                        finding.after
+                    );
+                }
+                SemverImpact::Patch => {}
+            }
+        }
+    }
+
     if let Ok(summary_path) = env::var("GITHUB_STEP_SUMMARY")
         && !summary_path.trim().is_empty()
     {
@@ -313,19 +344,19 @@ pub fn write_sarif_report(report: &SpecterAuditReport, path: &Path) -> Result<()
                     "informationUri": "https://github.com/glastor-core/specter",
                     "version": report.version,
                     "rules": [
-                        {"id": "SPC001", "shortDescription": {"text": "Exported Symbol Removed"}},
-                        {"id": "SPC002", "shortDescription": {"text": "Required Parameter Added"}},
-                        {"id": "SPC003", "shortDescription": {"text": "Function Parameter Removed"}},
-                        {"id": "SPC004", "shortDescription": {"text": "Optional Parameter Became Required"}},
-                        {"id": "SPC005", "shortDescription": {"text": "Parameter Type Mutated"}},
-                        {"id": "SPC006", "shortDescription": {"text": "Return Type Mutated"}},
-                        {"id": "SPC007", "shortDescription": {"text": "Async/Sync Contract Mutated"}},
-                        {"id": "SPC008", "shortDescription": {"text": "Public Field or Variant Removed"}},
-                        {"id": "SPC009", "shortDescription": {"text": "Optional Field Became Required"}},
-                        {"id": "SPC010", "shortDescription": {"text": "Public Field Type Mutated"}},
-                        {"id": "SPC011", "shortDescription": {"text": "New Exported Symbol Added"}},
-                        {"id": "SPC012", "shortDescription": {"text": "Backward-Compatible Optional Member Added"}},
-                        {"id": "SPC013", "shortDescription": {"text": "Public Barrel Re-Export Removed"}}
+                        {"id": "SPC001", "shortDescription": {"text": "Exported Symbol Removed"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC002", "shortDescription": {"text": "Required Parameter Added"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC003", "shortDescription": {"text": "Function Parameter Removed"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC004", "shortDescription": {"text": "Optional Parameter Became Required"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC005", "shortDescription": {"text": "Parameter Type Mutated"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC006", "shortDescription": {"text": "Return Type Mutated"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC007", "shortDescription": {"text": "Async/Sync Contract Mutated"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC008", "shortDescription": {"text": "Public Field or Variant Removed"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC009", "shortDescription": {"text": "Optional Field Became Required"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC010", "shortDescription": {"text": "Public Field Type Mutated"}, "defaultConfiguration": {"level": "error"}},
+                        {"id": "SPC011", "shortDescription": {"text": "New Exported Symbol Added"}, "defaultConfiguration": {"level": "note"}},
+                        {"id": "SPC012", "shortDescription": {"text": "Backward-Compatible Optional Member Added"}, "defaultConfiguration": {"level": "note"}},
+                        {"id": "SPC013", "shortDescription": {"text": "Public Barrel Re-Export Removed"}, "defaultConfiguration": {"level": "error"}}
                     ]
                 }
             },
@@ -391,4 +422,110 @@ pub fn write_cyclonedx_sbom(
 
     fs::write(path, serde_json::to_string_pretty(&sbom)?)?;
     Ok(())
+}
+
+/// Renders a terminal-friendly, ANSI-colored diff review for interactive CLI usage.
+pub fn render_terminal_colored_diff(report: &SpecterAuditReport, use_color: bool) -> String {
+    let (c_bold, c_reset, c_red, c_green, c_yellow, _c_cyan, c_dim) = if use_color {
+        (
+            "\x1b[1m", "\x1b[0m", "\x1b[31m", "\x1b[32m", "\x1b[33m", "\x1b[36m", "\x1b[2m",
+        )
+    } else {
+        ("", "", "", "", "", "", "")
+    };
+
+    let mut out = String::new();
+    out.push_str(&format!(
+        "\n{}🛡️  GLASTOR® Specter v{} — API Contract & SemVer Audit{}\n",
+        c_bold, report.version, c_reset
+    ));
+    out.push_str(&format!(
+        "{}──────────────────────────────────────────────────────────────────────────────{}\n",
+        c_dim, c_reset
+    ));
+
+    let verdict_color = match report.verdict {
+        AuditVerdict::Passed => c_green,
+        AuditVerdict::Warning => c_yellow,
+        AuditVerdict::Failed => c_red,
+    };
+    out.push_str(&format!(
+        "  Status:       {}{}{} ({} ms, {} files scanned)\n",
+        verdict_color,
+        report.verdict.badge(),
+        c_reset,
+        report.duration_ms,
+        report.files_scanned
+    ));
+    out.push_str(&format!(
+        "  Required:     {}SemVer {} Bump{}\n",
+        c_bold,
+        report.diff.required_bump.as_str().to_uppercase(),
+        c_reset
+    ));
+    let base_short = &report.diff.base_fingerprint[..8.min(report.diff.base_fingerprint.len())];
+    let head_short = &report.diff.head_fingerprint[..8.min(report.diff.head_fingerprint.len())];
+    out.push_str(&format!(
+        "  Fingerprint:  {}{} → {}{}\n",
+        c_dim, base_short, head_short, c_reset
+    ));
+    out.push_str(&format!(
+        "  Mutations:    {} breaking (MAJOR), {} backwards-compatible (MINOR)\n",
+        report.diff.breaking_count, report.diff.minor_count
+    ));
+    out.push_str(&format!(
+        "{}──────────────────────────────────────────────────────────────────────────────{}\n",
+        c_dim, c_reset
+    ));
+
+    if report.diff.findings.is_empty() {
+        out.push_str(&format!(
+            "  {}✨ Public API contract is 100% immutable & identical to baseline.{}\n",
+            c_green, c_reset
+        ));
+    } else {
+        out.push_str(&format!(
+            "{}Detailed Mutations & Contract Diffs:{}\n",
+            c_bold, c_reset
+        ));
+        for finding in &report.diff.findings {
+            let (tag, color) = match finding.impact {
+                SemverImpact::Major => ("[-]", c_red),
+                SemverImpact::Minor => ("[+]", c_green),
+                SemverImpact::Patch => ("[~]", c_yellow),
+            };
+            out.push_str(&format!(
+                "  {}{}{} {} ({}:{}) {}\n",
+                color,
+                tag,
+                c_reset,
+                finding.symbol_name,
+                finding.file,
+                finding.line.max(1),
+                c_dim
+            ));
+            out.push_str(&format!(
+                "      {}Reason:{}   {}\n",
+                c_dim, c_reset, finding.reason
+            ));
+            if !finding.before.is_empty() {
+                out.push_str(&format!(
+                    "      {}Before:{}   {}{}{}\n",
+                    c_dim, c_reset, c_red, finding.before, c_reset
+                ));
+            }
+            if !finding.after.is_empty() {
+                out.push_str(&format!(
+                    "      {}After:{}    {}{}{}\n",
+                    c_dim, c_reset, c_green, finding.after, c_reset
+                ));
+            }
+        }
+    }
+    out.push_str(&format!(
+        "{}──────────────────────────────────────────────────────────────────────────────{}\n\n",
+        c_dim, c_reset
+    ));
+
+    out
 }
