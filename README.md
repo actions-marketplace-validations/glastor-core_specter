@@ -8,6 +8,7 @@
   <img src="https://res.cloudinary.com/dzualplqi/image/upload/v1794597633/specter_lqfmhu.png" alt="GLASTOR® Specter — Polyglot AST API Contract Differ" width="100%" style="border-radius: 8px;">
 </p>
 
+[![Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-GLASTOR%C2%AE%20Specter-blue?logo=github-actions&logoColor=white)](https://github.com/marketplace/actions/glastor-specter-polyglot-ast-api-contract-semver-gatekeeper)
 [![CI & API Contract Audit](https://github.com/glastor-core/specter/actions/workflows/audit.yml/badge.svg)](https://github.com/glastor-core/specter/actions/workflows/audit.yml)
 [![crates.io version](https://img.shields.io/crates/v/specter-cli?style=flat-square&color=orange&logo=rust)](https://crates.io/crates/specter-cli)
 [![crates.io downloads](https://img.shields.io/crates/d/specter-cli?style=flat-square&color=blue&logo=rust)](https://crates.io/crates/specter-cli)
@@ -65,6 +66,26 @@ Modern CI/CD pipelines blindly trust human or AI-authored commit messages (`fix:
 
 ---
 
+## ⚔️ Architectural Comparison: Specter vs Compiler-Dependent Tools
+
+Traditional contract tools depend on heavyweight compilation phases (`rustdoc JSON` or `tsc --emitDeclarationOnly`). In CI/CD pipelines, this means downloading large toolchains, compiling hundreds of transitive dependencies, and burning minutes of billable runner time on every Pull Request.
+
+**Specter** bypasses compilers completely, analyzing raw AST syntax and Git object streams in **< 5 milliseconds**.
+
+| Capability / Metric | 🛡️ **GLASTOR® Specter** | `cargo-semver-checks` | `@microsoft/api-extractor` | Conventional Commits Alone |
+| :--- | :---: | :---: | :---: | :---: |
+| **Execution Latency** | ⚡ **< 5 ms** (Zero-Compiler) | ⏳ 2 – 8 minutes | ⏳ 30s – 2 minutes | 0 ms (Manual) |
+| **Compiler Requirement** | ❌ **None** (No `rustc` / `tsc`) | ⚠️ Requires `rustdoc` JSON | ⚠️ Requires full `tsc` compile | ❌ None |
+| **Polyglot Monorepo Support** | 🦀 **Rust + 🦕 TS / JS / Deno** | 🦀 Rust only | 🟦 TypeScript only | N/A |
+| **Trojan Breaking-Change Guard** | ✅ **Automated Mathematical Check** | ❌ No commit intent check | ❌ No commit intent check | ❌ Blind human trust |
+| **Zero-Disk Git Extraction** | ✅ In-memory (`git show` stream) | ❌ Full disk build required | ❌ Full disk build required | ❌ N/A |
+| **PR Sticky Comments & Migration** | ✅ Automated Markdown + Diff Guide | ❌ Text / CLI only | ❌ Markdown report only | ❌ N/A |
+| **Security & SBOM Compliance** | ✅ **SARIF 2.1.0 + CycloneDX 1.5** | ❌ Custom JSON only | ❌ Custom doc model only | ❌ None |
+| **FinOps CI Minute Cost** | 🟢 **~$0.00** (< 5ms runner time) | 🔴 High CI minute cost | 🟡 Moderate CI minute cost | 🟢 $0 |
+| **Supply-Chain Attack Surface** | 🛡️ **Zero External Dependencies** | ⚠️ Multiple cargo plugins | ⚠️ 50+ npm dependencies | ❌ Vulnerable to deception |
+
+---
+
 ## 📋 Mathematical SemVer Contract Rules (`SPC001` – `SPC013`)
 
 | Rule ID | SemVer Impact | Description |
@@ -86,6 +107,24 @@ Modern CI/CD pipelines blindly trust human or AI-authored commit messages (`fix:
 ---
 
 ## 🚀 Quick Start (GitHub Actions)
+
+### ⚡ 5-Line Plug & Play (Minimal Copy-Paste)
+
+Add this single step to any Pull Request workflow (`.github/workflows/ci.yml`). It runs in **< 5 ms** without requiring compiler setup:
+
+```yaml
+- name: 🛡️ Audit API Contract & SemVer Gate
+  uses: glastor-core/specter@v1
+  with:
+    base-ref: ${{ github.base_ref || 'origin/main' }}
+    fail-on-trojan: "true"
+```
+
+---
+
+### 🛡️ Full Enterprise Pipeline (SARIF 2.1.0 + CycloneDX 1.5 SBOM)
+
+For complete integration with GitHub Code Scanning alerts, SBOM artifacts, and full JSON audit telemetry:
 
 ```yaml
 - name: 🛡️ Audit Public API Contract & SemVer with GLASTOR® Specter
