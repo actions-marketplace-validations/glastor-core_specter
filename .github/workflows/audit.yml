@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -68,7 +68,7 @@ jobs:
           post-pr-comment: "true"
 
       - name: Restore previous API Contract Snapshot baseline
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: .specter/baseline-snapshot.json
           key: specter-baseline-${{ github.ref_name }}-${{ github.sha }}
@@ -122,7 +122,7 @@ jobs:
 
       - name: Update baseline snapshot cache on main/master
         if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master')
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: .specter/baseline-snapshot.json
           key: specter-baseline-${{ github.ref_name }}-${{ github.sha }}
@@ -131,7 +131,7 @@ jobs:
 
       - name: Upload JSON, SARIF & CycloneDX SBOM Telemetry Artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: specter-telemetry
           path: |
@@ -153,7 +153,7 @@ jobs:
       security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Run GLASTOR® Nemesis SAST & IaC Security Gate
         uses: glastor-core/nemesis@v1
