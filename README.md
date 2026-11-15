@@ -17,6 +17,9 @@
 [![Rust Edition 2024](https://img.shields.io/badge/Rust-2024_Edition-orange.svg)](https://www.rust-lang.org/)
 [![GLASTOR Core](https://img.shields.io/badge/GLASTOR%C2%AE_Core-Enterprise_DevSecOps-8A2BE2)](https://glastor.es)
 <br>
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/glastor-core/specter)
+[![Watch on GitHub](https://img.shields.io/github/watchers/glastor-core/specter?style=social&label=Watch)](https://github.com/glastor-core/specter/watchers)
+[![Fork on GitHub](https://img.shields.io/github/forks/glastor-core/specter?style=social&label=Fork)](https://github.com/glastor-core/specter/fork)
 [![Star on GitHub](https://img.shields.io/github/stars/glastor-core/specter?style=social)](https://github.com/glastor-core/specter)
 [![Follow @glastor-dev](https://img.shields.io/github/followers/glastor-dev?label=Follow%20%40glastor-dev&style=social)](https://github.com/glastor-dev)
 
@@ -122,6 +125,22 @@ Show the community that your public API contract and SemVer releases are mathema
 ```markdown
 [![API Contract: Specter](https://img.shields.io/badge/API%20Contract-Specter%20AST-8b5cf6?style=for-the-badge)](https://github.com/glastor-core/specter)
 ```
+
+---
+
+## 🤝 Contributing & Good First Issues
+
+Looking to contribute to AST static analysis, compiler tooling, or Rust 2024 diagnostics?
+
+1. **[Fork this repository](https://github.com/glastor-core/specter/fork)** or launch it directly in [GitHub Codespaces](https://codespaces.new/glastor-core/specter).
+2. Explore our open beginner-friendly tasks under [Issue #11](https://github.com/glastor-core/specter/issues/11) (`good first issue`).
+3. Run the test suite:
+   ```bash
+   cargo test
+   ```
+4. Submit your Pull Request!
+
+> 🔔 **Stay Updated on Linter & Security Rules**: Click **Watch** (top-right) and select **Custom ➔ Releases** to get notified of new SARIF integrations, Homebrew releases, and SemVer checks.
 
 ---
 
