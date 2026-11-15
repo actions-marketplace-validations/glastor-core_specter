@@ -68,7 +68,7 @@ jobs:
           post-pr-comment: "true"
 
       - name: Restore previous API Contract Snapshot baseline
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: .specter/baseline-snapshot.json
           key: specter-baseline-${{ github.ref_name }}-${{ github.sha }}
@@ -122,7 +122,7 @@ jobs:
 
       - name: Update baseline snapshot cache on main/master
         if: github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master')
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: .specter/baseline-snapshot.json
           key: specter-baseline-${{ github.ref_name }}-${{ github.sha }}
