@@ -28,6 +28,10 @@
 
 ---
 
+<p align="center">
+  <img src="./assets/terminal-demo.svg" alt="GLASTOR® Specter — Live Terminal Demo" width="100%" />
+</p>
+
 ## 🎯 Why `specter` Exists
 
 Modern CI/CD pipelines blindly trust human or AI-authored commit messages (`fix:`, `chore:`, `feat:`) to determine whether a release is `PATCH`, `MINOR`, or `MAJOR`. When a developer writes `fix(gateway): clean up retry config` while changing an optional parameter `timeoutMs?: number` to required `timeoutMs: number`, traditional pipelines publish a **Trojan Breaking Change** inside a `PATCH` release—breaking downstream production systems silently.
