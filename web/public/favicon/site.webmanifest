@@ -1,0 +1,14 @@
+{
+  "name": "GLASTOR® Specter",
+  "short_name": "Specter",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "theme_color": "#080c14",
+  "background_color": "#080c14",
+  "display": "standalone"
+}
