@@ -1,0 +1,88 @@
+---
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import Comparison from '../components/Comparison.astro';
+import Playground from '../components/Playground.astro';
+import RulesBento from '../components/RulesBento.astro';
+import ArchitectureFlow from '../components/ArchitectureFlow.astro';
+import CodeTabs from '../components/CodeTabs.astro';
+import Faq from '../components/Faq.astro';
+import Enterprise from '../components/Enterprise.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth bg-cyber-dark text-slate-100 antialiased selection:bg-cyber-cyan selection:text-cyber-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Red Hat Typography Family (Google Fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@700;800;900&family=Red+Hat+Mono:wght@400;500;600;700&family=Red+Hat+Text:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Google Material Symbols Outlined -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0,0&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>GLASTOR® — specter v0.2.1 | Zero-Compiler Polyglot AST API Contract Differ & SemVer Gate</title>
+    <meta name="description" content="Zero-Compiler Polyglot AST API Contract Differ, Trojan Breaking-Change Detector & Mathematical SemVer Gatekeeper in Rust. Sub-5ms latency across Rust and TypeScript." />
+    <link rel="canonical" href="https://specter.glastor.es/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://specter.glastor.es/" />
+    <meta property="og:title" content="GLASTOR® — specter v0.2.1 | Zero-Compiler Polyglot AST API Differ" />
+    <meta property="og:description" content="Stop trusting human and AI commit messages blindly. Enforce mathematical SemVer and catch breaking changes in <5ms." />
+    <meta property="og:image" content="https://res.cloudinary.com/dzualplqi/image/upload/v1794597633/specter_lqfmhu.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="GLASTOR® — specter v0.2.1 | Zero-Compiler Polyglot AST API Differ" />
+    <meta name="twitter:description" content="Stop trusting human and AI commit messages blindly. Enforce mathematical SemVer and catch breaking changes in <5ms." />
+    <meta name="twitter:image" content="https://res.cloudinary.com/dzualplqi/image/upload/v1794597633/specter_lqfmhu.png" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "GLASTOR® Specter",
+        "operatingSystem": "Linux, macOS, Windows",
+        "applicationCategory": "DeveloperApplication",
+        "releaseNotes": "https://github.com/glastor-core/specter/releases",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "Zero-Compiler Polyglot AST API Contract Differ, Trojan Breaking-Change Guard & Mathematical SemVer Gatekeeper in Rust."
+      }
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-cyber-dark text-slate-100 flex flex-col font-sans selection:bg-cyber-indigo selection:text-white">
+    <Navbar />
+
+    <main class="flex-grow">
+      <Hero />
+      <Comparison />
+      <Playground />
+      <RulesBento />
+      <ArchitectureFlow />
+      <CodeTabs />
+      <Faq />
+      <Enterprise />
+    </main>
+
+    <Footer />
+  </body>
+</html>

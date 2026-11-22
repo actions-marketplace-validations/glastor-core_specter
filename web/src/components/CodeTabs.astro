@@ -1,0 +1,158 @@
+---
+// CodeTabs.astro - Installation & Integration Code Tabs
+---
+
+<section id="install" class="py-24 bg-cyber-dark/80 border-t border-cyber-border/70 relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-purple/10 border border-cyber-purple/30 text-cyber-purple text-xs font-mono mb-4">
+        <span class="material-symbols-outlined text-sm">terminal</span>
+        <span>GET STARTED IN SECONDS</span>
+      </div>
+      <h2 class="font-display font-black text-3xl sm:text-5xl text-white tracking-tight mb-4">
+        Integrate into Any Workflow
+      </h2>
+      <p class="font-sans text-slate-300 text-base sm:text-lg">
+        Whether you run GitHub Actions, Kubernetes CI runners, or local dev machines, Specter installs in milliseconds with zero dependencies.
+      </p>
+    </div>
+
+    <!-- Code Switcher Box -->
+    <div class="max-w-4xl mx-auto rounded-2xl bg-cyber-card border border-cyber-border shadow-2xl overflow-hidden">
+      <!-- Tabs Bar -->
+      <div class="px-4 py-3 bg-slate-900 border-b border-cyber-border flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-1 sm:gap-2">
+          <button
+            class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 bg-cyber-indigo text-white transition-all"
+            data-target="tab-gh-action"
+          >
+            <span class="material-symbols-outlined text-sm">bolt</span>
+            <span>GitHub Action (5 Lines)</span>
+          </button>
+          <button
+            class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 bg-transparent text-slate-400 hover:text-white transition-all"
+            data-target="tab-enterprise"
+          >
+            <span class="material-symbols-outlined text-sm">security</span>
+            <span>Enterprise (SARIF/SBOM)</span>
+          </button>
+          <button
+            class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 bg-transparent text-slate-400 hover:text-white transition-all"
+            data-target="tab-cli"
+          >
+            <span class="material-symbols-outlined text-sm">code</span>
+            <span>Cargo CLI</span>
+          </button>
+          <button
+            class="tab-btn px-3 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1.5 bg-transparent text-slate-400 hover:text-white transition-all"
+            data-target="tab-brew"
+          >
+            <span class="material-symbols-outlined text-sm">local_cafe</span>
+            <span>Homebrew</span>
+          </button>
+        </div>
+
+        <button
+          id="copy-code-btn"
+          class="flex items-center gap-1 px-2.5 py-1 rounded bg-cyber-border/70 hover:bg-cyber-border text-xs text-cyber-cyan font-mono transition-colors"
+          title="Copy to clipboard"
+        >
+          <span class="material-symbols-outlined text-sm" id="copy-code-icon">content_copy</span>
+          <span id="copy-code-text">Copy</span>
+        </button>
+      </div>
+
+      <!-- Tab Panels -->
+      <div class="p-6 bg-slate-950 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto">
+        <!-- Tab 1: 5-Line Action -->
+        <pre id="tab-gh-action" class="code-panel text-slate-300"><code><span class="text-slate-500"># In your Pull Request workflow (.github/workflows/ci.yml)</span>
+- <span class="text-cyber-cyan">name</span>: <span class="text-slate-200">Audit API Contract & SemVer Gate</span>
+  <span class="text-cyber-cyan">uses</span>: <span class="text-cyber-emerald font-semibold">glastor-core/specter@v1</span>
+  <span class="text-cyber-cyan">with</span>:
+    <span class="text-cyber-indigo">base-ref</span>: <span class="text-amber-300">&dollar;&#123;&#123; github.base_ref || 'origin/main' &#125;&#125;</span></code></pre>
+
+        <!-- Tab 2: Enterprise -->
+        <pre id="tab-enterprise" class="code-panel text-slate-300 hidden"><code><span class="text-slate-500"># Enterprise compliance with SARIF 2.1.0 & CycloneDX 1.5 SBOM</span>
+- <span class="text-cyber-cyan">name</span>: <span class="text-slate-200">Audit Public API Contract & SemVer with GLASTOR® Specter</span>
+  <span class="text-cyber-cyan">id</span>: <span class="text-slate-200">specter</span>
+  <span class="text-cyber-cyan">uses</span>: <span class="text-cyber-emerald font-semibold">glastor-core/specter@v1</span>
+  <span class="text-cyber-cyan">with</span>:
+    <span class="text-cyber-indigo">base-ref</span>: <span class="text-amber-300">&dollar;&#123;&#123; github.base_ref || 'origin/main' &#125;&#125;</span>
+    <span class="text-cyber-indigo">output-sarif</span>: <span class="text-amber-300">'specter-results.sarif'</span>
+    <span class="text-cyber-indigo">output-cyclonedx</span>: <span class="text-amber-300">'api-contract-sbom.json'</span>
+    <span class="text-cyber-indigo">strict-mode</span>: <span class="text-amber-300">'true'</span>
+
+- <span class="text-cyber-cyan">name</span>: <span class="text-slate-200">Upload SARIF to GitHub Code Scanning</span>
+  <span class="text-cyber-cyan">uses</span>: <span class="text-slate-300">github/codeql-action/upload-sarif@v3</span>
+  <span class="text-cyber-cyan">if</span>: <span class="text-slate-200">always()</span>
+  <span class="text-cyber-cyan">with</span>:
+    <span class="text-cyber-indigo">sarif_file</span>: <span class="text-amber-300">'specter-results.sarif'</span></code></pre>
+
+        <!-- Tab 3: CLI -->
+        <pre id="tab-cli" class="code-panel text-slate-300 hidden"><code><span class="text-slate-500"># Install high-performance standalone Rust CLI</span>
+cargo install <span class="text-cyber-cyan">specter-cli</span>
+
+<span class="text-slate-500"># Diff current working tree against main in under 5ms</span>
+specter diff --base origin/main
+
+<span class="text-slate-500"># Enforce zero breaking changes gate</span>
+specter gate --base origin/main --enforce-semver</code></pre>
+
+        <!-- Tab 4: Homebrew -->
+        <pre id="tab-brew" class="code-panel text-slate-300 hidden"><code><span class="text-slate-500"># macOS and Linux Homebrew Tap</span>
+brew tap <span class="text-cyber-cyan">glastor-core/homebrew-tap</span>
+brew install <span class="text-cyber-emerald">specter</span>
+
+<span class="text-slate-500"># Run quick audit</span>
+specter --version</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.code-panel');
+  const copyBtn = document.getElementById('copy-code-btn');
+  const copyIcon = document.getElementById('copy-code-icon');
+  const copyText = document.getElementById('copy-code-text');
+
+  let activeCode = `- name: Audit API Contract & SemVer Gate\n  uses: glastor-core/specter@v1\n  with:\n    base-ref: \${{ github.base_ref || 'origin/main' }}`;
+
+  tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach(b => {
+        b.classList.remove('bg-cyber-indigo', 'text-white');
+        b.classList.add('bg-transparent', 'text-slate-400');
+      });
+      btn.classList.add('bg-cyber-indigo', 'text-white');
+      btn.classList.remove('bg-transparent', 'text-slate-400');
+
+      const targetId = btn.getAttribute('data-target');
+      panels.forEach(p => {
+        if (p.id === targetId) {
+          p.classList.remove('hidden');
+          activeCode = p.textContent || '';
+        } else {
+          p.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  copyBtn?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(activeCode);
+      if (copyIcon && copyText) {
+        copyIcon.textContent = 'check';
+        copyText.textContent = 'Copied!';
+        setTimeout(() => {
+          copyIcon.textContent = 'content_copy';
+          copyText.textContent = 'Copy';
+        }, 2000);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+</script>
