@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ GLASTOR® Specter (`@glastor-core/specter`)
+# 🛡 GLASTOR® Specter (`@glastor-core/specter`)
 
 **Zero-Compiler Polyglot AST API Contract Differ, Trojan Breaking-Change Detector & Mathematical SemVer Gatekeeper in Rust**
 
@@ -13,7 +13,7 @@
 [![crates.io version](https://img.shields.io/crates/v/specter-cli?style=flat-square&color=orange&logo=rust)](https://crates.io/crates/specter-cli)
 [![crates.io downloads](https://img.shields.io/crates/d/specter-cli?style=flat-square&color=blue&logo=rust)](https://crates.io/crates/specter-cli)
 [![Homebrew Tap](https://img.shields.io/badge/Homebrew-brew_install_specter-orange?style=flat-square&logo=homebrew)](https://github.com/glastor-core/homebrew-tap)
-[![Release & SLSA Provenance](https://github.com/glastor-core/specter/actions/workflows/release.yml/badge.svg)](https://github.com/glastor-core/specter/actions/workflows/release.yml)
+[![Release & SLSA Provenance](https://github.com/glastor-core/specter/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/glastor-core/specter/actions/workflows/release.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Rust Edition 2024](https://img.shields.io/badge/Rust-2024_Edition-orange.svg)](https://www.rust-lang.org/)
 [![GLASTOR Core](https://img.shields.io/badge/GLASTOR%C2%AE_Core-Enterprise_DevSecOps-8A2BE2)](https://glastor.es)
@@ -40,7 +40,7 @@ Modern CI/CD pipelines blindly trust human or AI-authored commit messages (`fix:
 
 ---
 
-## 🏗️ Ecosystem Synergy (`GLASTOR® Core`)
+## 🏗 Ecosystem Synergy (`GLASTOR® Core`)
 
 <p align="center">
   <img src="./image.svg" alt="GLASTOR® Core — Continuous Zero-Trust Verification & Edge Delivery Pipeline" width="100%">
@@ -70,23 +70,23 @@ Modern CI/CD pipelines blindly trust human or AI-authored commit messages (`fix:
 
 ---
 
-## ⚔️ Architectural Comparison: Specter vs Compiler-Dependent Tools
+## ⚔ Architectural Comparison: Specter vs Compiler-Dependent Tools
 
 Traditional contract tools depend on heavyweight compilation phases (`rustdoc JSON` or `tsc --emitDeclarationOnly`). In CI/CD pipelines, this means downloading large toolchains, compiling hundreds of transitive dependencies, and burning minutes of billable runner time on every Pull Request.
 
 **Specter** bypasses compilers completely, analyzing raw AST syntax and Git object streams in **< 5 milliseconds**.
 
-| Capability / Metric | 🛡️ **GLASTOR® Specter** | `cargo-semver-checks` | `@microsoft/api-extractor` | Conventional Commits Alone |
+| Capability / Metric | 🛡 **GLASTOR® Specter** | `cargo-semver-checks` | `@microsoft/api-extractor` | Conventional Commits Alone |
 | :--- | :---: | :---: | :---: | :---: |
 | **Execution Latency** | ⚡ **< 5 ms** (Zero-Compiler) | ⏳ 2 – 8 minutes | ⏳ 30s – 2 minutes | 0 ms (Manual) |
-| **Compiler Requirement** | ❌ **None** (No `rustc` / `tsc`) | ⚠️ Requires `rustdoc` JSON | ⚠️ Requires full `tsc` compile | ❌ None |
+| **Compiler Requirement** | ❌ **None** (No `rustc` / `tsc`) | ⚠ Requires `rustdoc` JSON | ⚠ Requires full `tsc` compile | ❌ None |
 | **Polyglot Monorepo Support** | 🦀 **Rust + 🦕 TS / JS / Deno** | 🦀 Rust only | 🟦 TypeScript only | N/A |
 | **Trojan Breaking-Change Guard** | ✅ **Automated Mathematical Check** | ❌ No commit intent check | ❌ No commit intent check | ❌ Blind human trust |
 | **Zero-Disk Git Extraction** | ✅ In-memory (`git show` stream) | ❌ Full disk build required | ❌ Full disk build required | ❌ N/A |
 | **PR Sticky Comments & Migration** | ✅ Automated Markdown + Diff Guide | ❌ Text / CLI only | ❌ Markdown report only | ❌ N/A |
 | **Security & SBOM Compliance** | ✅ **SARIF 2.1.0 + CycloneDX 1.5** | ❌ Custom JSON only | ❌ Custom doc model only | ❌ None |
 | **FinOps CI Minute Cost** | 🟢 **~$0.00** (< 5ms runner time) | 🔴 High CI minute cost | 🟡 Moderate CI minute cost | 🟢 $0 |
-| **Supply-Chain Attack Surface** | 🛡️ **Zero External Dependencies** | ⚠️ Multiple cargo plugins | ⚠️ 50+ npm dependencies | ❌ Vulnerable to deception |
+| **Supply-Chain Attack Surface** | 🛡 **Zero External Dependencies** | ⚠ Multiple cargo plugins | ⚠ 50+ npm dependencies | ❌ Vulnerable to deception |
 
 ---
 
@@ -117,7 +117,7 @@ Traditional contract tools depend on heavyweight compilation phases (`rustdoc JS
 Add this single step to any Pull Request workflow (`.github/workflows/ci.yml`). It runs in **< 5 ms** without requiring compiler setup:
 
 ```yaml
-- name: 🛡️ Audit API Contract & SemVer Gate
+- name: 🛡 Audit API Contract & SemVer Gate
   uses: glastor-core/specter@v1
   with:
     base-ref: ${{ github.base_ref || 'origin/main' }}
@@ -126,12 +126,12 @@ Add this single step to any Pull Request workflow (`.github/workflows/ci.yml`). 
 
 ---
 
-### 🛡️ Full Enterprise Pipeline (SARIF 2.1.0 + CycloneDX 1.5 SBOM)
+### 🛡 Full Enterprise Pipeline (SARIF 2.1.0 + CycloneDX 1.5 SBOM)
 
 For complete integration with GitHub Code Scanning alerts, SBOM artifacts, and full JSON audit telemetry:
 
 ```yaml
-- name: 🛡️ Audit Public API Contract & SemVer with GLASTOR® Specter
+- name: 🛡 Audit Public API Contract & SemVer with GLASTOR® Specter
   id: specter
   uses: glastor-core/specter@v1
   with:
