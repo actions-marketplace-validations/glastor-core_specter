@@ -1,0 +1,167 @@
+---
+// Navbar.astro - GLASTOR® Specter Navigation Bar
+---
+
+<nav class="sticky top-0 z-50 bg-cyber-dark/90 backdrop-blur-md border-b border-cyber-border/70 transition-all">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+    <!-- Brand / Logo -->
+    <a href="#" class="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+      <img src="/images/isologo.webp" alt="GLASTOR® Specter" class="w-8 h-8 sm:w-9 sm:h-9 object-contain shrink-0" />
+      <div class="flex flex-col justify-center shrink-0 text-left">
+        <span class="font-display font-black text-base sm:text-lg tracking-tight text-white leading-none">
+          GLASTOR®
+        </span>
+        <span class="font-mono text-[9px] sm:text-[10px] font-bold tracking-[0.2em] text-[#00ff9d] uppercase leading-none mt-1">
+          RUST ENGINEERING
+        </span>
+      </div>
+      <span class="px-1.5 sm:px-2 py-0.5 text-[10px] font-mono rounded bg-slate-800 text-cyber-cyan border border-cyber-border font-semibold shrink-0">
+        specter v0.8.1
+      </span>
+    </a>
+
+    <!-- Desktop Nav Links -->
+    <div class="hidden lg:flex items-center gap-4 xl:gap-6 text-xs xl:text-sm font-medium text-slate-300 shrink-0">
+      <a href="#comparison" class="hover:text-cyber-cyan transition-colors flex items-center gap-1.5 whitespace-nowrap">
+        <span class="material-symbols-outlined text-base text-cyber-cyan">compare_arrows</span>
+        <span>Comparison</span>
+      </a>
+      <a href="#simulator" class="hover:text-cyber-cyan transition-colors flex items-center gap-1.5 whitespace-nowrap">
+        <span class="material-symbols-outlined text-base text-cyber-indigo">terminal</span>
+        <span>Simulator</span>
+      </a>
+      <a href="#rules" class="hover:text-cyber-cyan transition-colors flex items-center gap-1.5 whitespace-nowrap">
+        <span class="material-symbols-outlined text-base text-cyber-amber">rule</span>
+        <span>Rules</span>
+      </a>
+      <a href="#pipeline" class="hover:text-cyber-cyan transition-colors flex items-center gap-1.5 whitespace-nowrap">
+        <span class="material-symbols-outlined text-base text-cyber-emerald">schema</span>
+        <span>Architecture</span>
+      </a>
+      <a href="#install" class="hover:text-cyber-cyan transition-colors flex items-center gap-1.5 whitespace-nowrap">
+        <span class="material-symbols-outlined text-base text-cyber-purple">download</span>
+        <span>Install</span>
+      </a>
+      <a href="#faq" class="hover:text-cyber-cyan transition-colors flex items-center gap-1.5 whitespace-nowrap">
+        <span class="material-symbols-outlined text-base text-slate-400">help</span>
+        <span>FAQ</span>
+      </a>
+    </div>
+
+    <!-- Actions & GitHub -->
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <!-- GitHub Button -->
+      <a
+        href="https://github.com/glastor-core/specter"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyber-card border border-cyber-border hover:border-cyber-borderHover text-slate-200 text-xs font-mono font-medium hover:bg-slate-800 transition-all whitespace-nowrap"
+        title="View on GitHub"
+      >
+        <svg class="w-3.5 h-3.5 fill-current text-white shrink-0" viewBox="0 0 24 24">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        <span>GitHub</span>
+        <span class="flex items-center gap-0.5 text-cyber-cyan font-bold text-[11px] ml-0.5">
+          <span class="material-symbols-outlined text-[13px]">star</span>
+          <span>Marketplace</span>
+        </span>
+      </a>
+
+      <!-- CTA Action Button -->
+      <a
+        href="https://github.com/marketplace/actions/glastor-specter-polyglot-ast-api-contract-semver-gatekeeper"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl bg-cyber-indigo hover:bg-cyber-indigoHover text-white shadow-lg shadow-cyber-indigo/25 transition-all hover:scale-[1.02] whitespace-nowrap flex items-center gap-1.5"
+      >
+        <span class="material-symbols-outlined text-sm sm:text-base">rocket_launch</span>
+        <span>Use Action</span>
+      </a>
+
+      <!-- Mobile Hamburger Button -->
+      <button
+        id="mobile-menu-btn"
+        type="button"
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+        class="lg:hidden inline-flex items-center justify-center w-9 h-9 rounded-xl bg-slate-900 border border-cyber-border text-slate-300 hover:text-white hover:border-cyber-cyan/50 transition-colors"
+      >
+        <span id="mobile-menu-icon" class="material-symbols-outlined text-xl">menu</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Menu -->
+  <div id="mobile-menu" class="hidden lg:hidden border-t border-cyber-border/70 bg-cyber-dark/95 backdrop-blur-xl px-4 py-4 space-y-2">
+    <a href="#comparison" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/70 transition-colors">
+      <span class="material-symbols-outlined text-base text-cyber-cyan">compare_arrows</span>
+      <span>Comparison Matrix</span>
+    </a>
+    <a href="#simulator" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/70 transition-colors">
+      <span class="material-symbols-outlined text-base text-cyber-indigo">terminal</span>
+      <span>AST Simulator</span>
+    </a>
+    <a href="#rules" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/70 transition-colors">
+      <span class="material-symbols-outlined text-base text-cyber-amber">rule</span>
+      <span>Rule Engine (SPC001-SPC013)</span>
+    </a>
+    <a href="#pipeline" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/70 transition-colors">
+      <span class="material-symbols-outlined text-base text-cyber-emerald">schema</span>
+      <span>5-Stage Architecture Flow</span>
+    </a>
+    <a href="#install" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/70 transition-colors">
+      <span class="material-symbols-outlined text-base text-cyber-purple">download</span>
+      <span>Installation & Quickstart</span>
+    </a>
+    <a href="#faq" class="mobile-nav-link flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-slate-800/70 transition-colors">
+      <span class="material-symbols-outlined text-base text-slate-400">help</span>
+      <span>Frequently Asked Questions</span>
+    </a>
+    <div class="pt-2 border-t border-cyber-border/60">
+      <a
+        href="https://github.com/glastor-core/specter"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm text-slate-200 bg-cyber-card border border-cyber-border"
+      >
+        <span class="flex items-center gap-2">
+          <svg class="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          <span>glastor-core/specter</span>
+        </span>
+        <span class="flex items-center gap-1 text-cyber-cyan text-xs font-mono">
+          <span class="material-symbols-outlined text-sm">star</span>
+          <span>Marketplace</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const menuIcon = document.getElementById('mobile-menu-icon');
+  const links = document.querySelectorAll('.mobile-nav-link');
+
+  menuBtn?.addEventListener('click', () => {
+    const isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
+    menuBtn.setAttribute('aria-expanded', String(!isExpanded));
+    menu?.classList.toggle('hidden');
+    if (menuIcon) {
+      menuIcon.textContent = isExpanded ? 'menu' : 'close';
+    }
+  });
+
+  links.forEach(link => {
+    link.addEventListener('click', () => {
+      menu?.classList.add('hidden');
+      menuBtn?.setAttribute('aria-expanded', 'false');
+      if (menuIcon) {
+        menuIcon.textContent = 'menu';
+      }
+    });
+  });
+</script>

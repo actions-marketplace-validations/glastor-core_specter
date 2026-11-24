@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://specter.glastor.es/sitemap.xml

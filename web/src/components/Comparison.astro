@@ -1,0 +1,155 @@
+---
+// Comparison.astro - GLASTOR® Specter vs Compiler-Dependent Tools
+---
+
+<section id="comparison" class="py-24 bg-cyber-dark/60 border-t border-cyber-border/70 relative">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-indigo/10 border border-cyber-indigo/30 text-cyber-indigo text-xs font-mono mb-4">
+        <span class="material-symbols-outlined text-sm">compare_arrows</span>
+        <span>BENCHMARKS & ARCHITECTURE</span>
+      </div>
+      <h2 class="font-display font-black text-3xl sm:text-5xl text-white tracking-tight mb-4">
+        Specter vs Compiler-Dependent Differ Tools
+      </h2>
+      <p class="font-sans text-slate-300 text-base sm:text-lg">
+        Traditional tooling forces CI runners to download GBs of compiler toolchains and compile hundreds of transitive dependencies just to inspect function signatures. Specter inspects raw AST in under 5 milliseconds.
+      </p>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="rounded-2xl border border-cyber-border bg-cyber-card/80 overflow-hidden shadow-2xl backdrop-blur-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-sm">
+          <thead>
+            <tr class="border-b border-cyber-border bg-slate-900/90 text-xs font-mono uppercase tracking-wider text-slate-400">
+              <th scope="col" class="py-4 px-6 text-slate-200">Capability / Metric</th>
+              <th scope="col" class="py-4 px-6 text-cyber-cyan bg-cyber-indigo/10 font-bold border-x border-cyber-border">
+                <div class="flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-base">shield</span>
+                  <span>GLASTOR® Specter</span>
+                </div>
+              </th>
+              <th scope="col" class="py-4 px-6 text-slate-300">cargo-semver-checks</th>
+              <th scope="col" class="py-4 px-6 text-slate-300">@microsoft/api-extractor</th>
+              <th scope="col" class="py-4 px-6 text-slate-400">Conventional Commits Alone</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-cyber-border/70 font-sans">
+            <!-- Row 1 -->
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-6 font-medium text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyber-cyan text-base">speed</span>
+                <span>Execution Latency</span>
+              </td>
+              <td class="py-4 px-6 font-mono font-bold text-cyber-cyan bg-cyber-indigo/5 border-x border-cyber-border">
+                &lt; 5 ms (Zero-Compiler)
+              </td>
+              <td class="py-4 px-6 text-slate-400 font-mono">2 – 8 minutes (rustdoc)</td>
+              <td class="py-4 px-6 text-slate-400 font-mono">30s – 2 minutes (tsc)</td>
+              <td class="py-4 px-6 text-slate-400 font-mono">0 ms (Manual text)</td>
+            </tr>
+
+            <!-- Row 2 -->
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-6 font-medium text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyber-indigo text-base">build_circle</span>
+                <span>Compiler Dependency</span>
+              </td>
+              <td class="py-4 px-6 font-mono text-cyber-emerald bg-cyber-indigo/5 border-x border-cyber-border font-bold">
+                Zero (No rustc / tsc)
+              </td>
+              <td class="py-4 px-6 text-rose-400/90 font-mono">Requires rustdoc JSON</td>
+              <td class="py-4 px-6 text-rose-400/90 font-mono">Requires full tsc build</td>
+              <td class="py-4 px-6 text-slate-400 font-mono">None</td>
+            </tr>
+
+            <!-- Row 3 -->
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-6 font-medium text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyber-amber text-base">warning</span>
+                <span>Trojan Breaking-Change Guard</span>
+              </td>
+              <td class="py-4 px-6 font-mono text-cyber-emerald bg-cyber-indigo/5 border-x border-cyber-border font-bold">
+                Automated Mathematical Check
+              </td>
+              <td class="py-4 px-6 text-slate-400">No commit intent check</td>
+              <td class="py-4 px-6 text-slate-400">No commit intent check</td>
+              <td class="py-4 px-6 text-rose-400/90">Blind human trust</td>
+            </tr>
+
+            <!-- Row 4 -->
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-6 font-medium text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyber-purple text-base">layers</span>
+                <span>Polyglot Monorepo Support</span>
+              </td>
+              <td class="py-4 px-6 font-mono text-white bg-cyber-indigo/5 border-x border-cyber-border font-bold">
+                Rust (.rs) + TS / Deno (.ts)
+              </td>
+              <td class="py-4 px-6 text-slate-400">Rust only</td>
+              <td class="py-4 px-6 text-slate-400">TypeScript only</td>
+              <td class="py-4 px-6 text-slate-500">N/A</td>
+            </tr>
+
+            <!-- Row 5 -->
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-6 font-medium text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyber-emerald text-base">memory</span>
+                <span>Zero-Disk Git Extraction</span>
+              </td>
+              <td class="py-4 px-6 font-mono text-cyber-emerald bg-cyber-indigo/5 border-x border-cyber-border font-bold">
+                In-memory (git show stream)
+              </td>
+              <td class="py-4 px-6 text-slate-400">Full disk build required</td>
+              <td class="py-4 px-6 text-slate-400">Full disk build required</td>
+              <td class="py-4 px-6 text-slate-500">N/A</td>
+            </tr>
+
+            <!-- Row 6 -->
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-6 font-medium text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyber-cyan text-base">comment</span>
+                <span>PR Sticky Comment & Diff</span>
+              </td>
+              <td class="py-4 px-6 font-mono text-white bg-cyber-indigo/5 border-x border-cyber-border font-bold">
+                Automated Markdown + Diff
+              </td>
+              <td class="py-4 px-6 text-slate-400">CLI output only</td>
+              <td class="py-4 px-6 text-slate-400">Markdown report file</td>
+              <td class="py-4 px-6 text-slate-500">None</td>
+            </tr>
+
+            <!-- Row 7 -->
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-6 font-medium text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyber-indigo text-base">verified_user</span>
+                <span>Security & SBOM Compliance</span>
+              </td>
+              <td class="py-4 px-6 font-mono text-cyber-emerald bg-cyber-indigo/5 border-x border-cyber-border font-bold">
+                SARIF 2.1.0 + CycloneDX 1.5
+              </td>
+              <td class="py-4 px-6 text-slate-400">Custom JSON only</td>
+              <td class="py-4 px-6 text-slate-400">Custom doc model only</td>
+              <td class="py-4 px-6 text-slate-500">None</td>
+            </tr>
+
+            <!-- Row 8 -->
+            <tr class="hover:bg-slate-800/40 transition-colors">
+              <td class="py-4 px-6 font-medium text-white flex items-center gap-2">
+                <span class="material-symbols-outlined text-cyber-emerald text-base">savings</span>
+                <span>FinOps CI Runner Minute Cost</span>
+              </td>
+              <td class="py-4 px-6 font-mono text-cyber-emerald bg-cyber-indigo/5 border-x border-cyber-border font-bold">
+                ~$0.00 (&lt;5ms runtime)
+              </td>
+              <td class="py-4 px-6 text-rose-400 font-mono">High CI minute cost</td>
+              <td class="py-4 px-6 text-amber-400 font-mono">Moderate CI minute cost</td>
+              <td class="py-4 px-6 text-slate-400 font-mono">$0 (Manual)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

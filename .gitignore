@@ -8,3 +8,8 @@
 specter-report.json
 byte-gauge-report.json
 
+
+/.vektor
+/web/node_modules
+/web/dist
+/web/.astro

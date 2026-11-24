@@ -1,0 +1,180 @@
+---
+// Playground.astro - Interactive AST Diff Simulator
+---
+
+<section id="simulator" class="py-24 bg-cyber-dark relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-16">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan text-xs font-mono mb-4">
+        <span class="material-symbols-outlined text-sm">terminal</span>
+        <span>INTERACTIVE SIMULATOR</span>
+      </div>
+      <h2 class="font-display font-black text-3xl sm:text-5xl text-white tracking-tight mb-4">
+        Catch Trojan Breaking Changes in Real-Time
+      </h2>
+      <p class="font-sans text-slate-300 text-base sm:text-lg">
+        See how Specter's AST engine catches breaking changes hiding behind harmless <code class="px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan font-mono text-xs">fix:</code> or <code class="px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan font-mono text-xs">chore:</code> commit titles before they reach production.
+      </p>
+    </div>
+
+    <!-- Simulator Shell -->
+    <div class="max-w-5xl mx-auto rounded-2xl bg-cyber-card border border-cyber-border shadow-2xl overflow-hidden">
+      <!-- Toolbar -->
+      <div class="px-6 py-4 bg-slate-900 border-b border-cyber-border flex flex-wrap items-center justify-between gap-4">
+        <!-- Language Switcher Tabs -->
+        <div class="flex items-center gap-2">
+          <button
+            id="tab-rust"
+            class="lang-tab px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-2 bg-cyber-indigo text-white shadow-sm transition-all"
+            data-lang="rust"
+          >
+            <span class="material-symbols-outlined text-sm">code</span>
+            <span>Rust (auth.rs)</span>
+          </button>
+          <button
+            id="tab-ts"
+            class="lang-tab px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-2 bg-cyber-card text-slate-400 hover:text-slate-200 border border-cyber-border transition-all"
+            data-lang="ts"
+          >
+            <span class="material-symbols-outlined text-sm">javascript</span>
+            <span>TypeScript (client.ts)</span>
+          </button>
+        </div>
+
+        <!-- Mode Indicator Badge -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono font-semibold">
+            <span class="material-symbols-outlined text-sm">gpp_bad</span>
+            <span id="trojan-indicator">TROJAN DETECTED: fix(...) hiding MAJOR</span>
+          </div>
+          <span class="text-xs text-slate-400 font-mono hidden sm:inline">&lt; 3.2 ms</span>
+        </div>
+      </div>
+
+      <!-- Diff & Detection Columns -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-cyber-border">
+        <!-- Left: Code Diff -->
+        <div class="p-6 bg-slate-950/80">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-cyber-indigo">difference</span>
+              <span>Git Public API Surface Diff</span>
+            </span>
+            <span class="text-[11px] font-mono text-amber-400 px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/30">
+              Commit: fix(api): refresh validation logic
+            </span>
+          </div>
+
+          <!-- Rust Diff Code Block -->
+          <div id="diff-rust" class="font-mono text-xs leading-relaxed overflow-x-auto space-y-1">
+            <div class="text-slate-500">// Base: origin/main (v0.2.0)</div>
+            <div class="text-rose-400 bg-rose-950/30 px-2 py-1 rounded -mx-2 flex items-center gap-2">
+              <span>- pub fn verify_session(token: &str) -&gt; Result&lt;Claims, AuthError&gt;</span>
+            </div>
+            <div class="text-slate-500">// Head: HEAD (commit 7a9e1f)</div>
+            <div class="text-emerald-400 bg-emerald-950/30 px-2 py-1 rounded -mx-2 flex items-center gap-2">
+              <span>+ pub fn verify_session(token: &str, strict: bool) -&gt; Result&lt;Claims, AuthError&gt;</span>
+            </div>
+            <div class="text-slate-500 pt-2">// Conventional Commit claimed: "fix(api): ..." (PATCH)</div>
+            <div class="text-rose-400 font-semibold">// Reality: Broken all existing call-sites with 1 arg!</div>
+          </div>
+
+          <!-- TS Diff Code Block (Hidden by default) -->
+          <div id="diff-ts" class="font-mono text-xs leading-relaxed overflow-x-auto space-y-1 hidden">
+            <div class="text-slate-500">// Base: origin/main (v1.4.0)</div>
+            <div class="text-rose-400 bg-rose-950/30 px-2 py-1 rounded -mx-2">
+              - export interface ClientOptions &#123; timeoutMs?: number; &#125;
+            </div>
+            <div class="text-slate-500">// Head: HEAD (commit 3d2c8a)</div>
+            <div class="text-emerald-400 bg-emerald-950/30 px-2 py-1 rounded -mx-2">
+              + export interface ClientOptions &#123; timeoutMs: number; &#125;
+            </div>
+            <div class="text-slate-500 pt-2">// Conventional Commit claimed: "chore: standardize client"</div>
+            <div class="text-rose-400 font-semibold">// Reality: Optional property changed to REQUIRED!</div>
+          </div>
+        </div>
+
+        <!-- Right: Specter AST Audit Result -->
+        <div class="p-6 bg-slate-900/60">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-cyber-cyan">verified</span>
+              <span>Specter AST Gate Report</span>
+            </span>
+            <span class="text-[11px] font-mono text-rose-400 px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/30 font-bold">
+              GATE: BLOCKED (Exit 1)
+            </span>
+          </div>
+
+          <!-- Audit Card -->
+          <div class="p-4 rounded-xl bg-slate-950/90 border border-cyber-border space-y-3 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-cyber-cyan font-bold" id="audit-rule">Rule: SPC001 [MAJOR]</span>
+              <span class="text-slate-400">Impact: BREAKING</span>
+            </div>
+
+            <div class="text-slate-300" id="audit-desc">
+              Public function parameter count changed from 1 to 2 without default argument.
+            </div>
+
+            <div class="p-2.5 rounded bg-rose-950/30 border border-rose-900/40 text-rose-300 text-[11px] leading-relaxed" id="audit-trojan">
+              <strong>Trojan Mismatch:</strong> Commit claims <code>PATCH</code> (<span class="text-white">fix</span>), but AST requires <strong class="text-white">MAJOR (v1.0.0)</strong>. PR gate failed to protect downstream consumers.
+            </div>
+
+            <div class="pt-2 text-slate-400 text-[11px]">
+              <div class="text-slate-300 font-semibold mb-1">Recommended Migration Guide:</div>
+              <p id="audit-migration" class="text-slate-400">
+                Retain original signature and introduce a new overload or <code>verify_session_with_opts(...)</code> to maintain backward compatibility.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const tabRust = document.getElementById('tab-rust');
+  const tabTs = document.getElementById('tab-ts');
+  const diffRust = document.getElementById('diff-rust');
+  const diffTs = document.getElementById('diff-ts');
+  const auditRule = document.getElementById('audit-rule');
+  const auditDesc = document.getElementById('audit-desc');
+  const auditTrojan = document.getElementById('audit-trojan');
+  const auditMigration = document.getElementById('audit-migration');
+
+  tabRust?.addEventListener('click', () => {
+    tabRust.classList.add('bg-cyber-indigo', 'text-white');
+    tabRust.classList.remove('bg-cyber-card', 'text-slate-400');
+    tabTs?.classList.remove('bg-cyber-indigo', 'text-white');
+    tabTs?.classList.add('bg-cyber-card', 'text-slate-400');
+
+    diffRust?.classList.remove('hidden');
+    diffTs?.classList.add('hidden');
+
+    if (auditRule && auditDesc && auditTrojan && auditMigration) {
+      auditRule.textContent = 'Rule: SPC001 [MAJOR]';
+      auditDesc.textContent = 'Public function parameter count changed from 1 to 2 without default argument.';
+      auditTrojan.innerHTML = '<strong>Trojan Mismatch:</strong> Commit claims <code>PATCH</code> (<span class="text-white">fix</span>), but AST requires <strong class="text-white">MAJOR (v1.0.0)</strong>. PR gate blocked to protect downstream consumers.';
+      auditMigration.textContent = 'Retain original signature and introduce a new overload or verify_session_with_opts(...) to maintain backward compatibility.';
+    }
+  });
+
+  tabTs?.addEventListener('click', () => {
+    tabTs.classList.add('bg-cyber-indigo', 'text-white');
+    tabTs.classList.remove('bg-cyber-card', 'text-slate-400');
+    tabRust?.classList.remove('bg-cyber-indigo', 'text-white');
+    tabRust?.classList.add('bg-cyber-card', 'text-slate-400');
+
+    diffTs?.classList.remove('hidden');
+    diffRust?.classList.add('hidden');
+
+    if (auditRule && auditDesc && auditTrojan && auditMigration) {
+      auditRule.textContent = 'Rule: SPC007 [MAJOR]';
+      auditDesc.textContent = 'TypeScript interface property "timeoutMs" mutated from optional (?) to required (:).';
+      auditTrojan.innerHTML = '<strong>Trojan Mismatch:</strong> Commit claims <code>chore</code>, but mutating optional field to required breaks all object instantiation without it.';
+      auditMigration.textContent = 'Keep timeoutMs optional with a fallback default value inside the client constructor.';
+    }
+  });
+</script>
