@@ -1,5 +1,7 @@
+use crate::config::SpecterConfig;
 use crate::extractor::{
     ContractSnapshot, FieldContract, Language, ParamContract, PublicSymbol, SymbolKind,
+    is_ts_union_subset,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -131,6 +133,16 @@ pub struct ContractDiffResult {
 
 /// Compares `base` and `head` public API snapshots and returns the deterministic SemVer impact.
 pub fn diff_contracts(base: &ContractSnapshot, head: &ContractSnapshot) -> ContractDiffResult {
+    diff_contracts_with_config(base, head, &SpecterConfig::default())
+}
+
+/// Compares `base` and `head` public API snapshots applying `specter.toml` rules,
+/// severity overrides, and inline `// specter-ignore: SPCxxx -- reason` suppressions.
+pub fn diff_contracts_with_config(
+    base: &ContractSnapshot,
+    head: &ContractSnapshot,
+    config: &SpecterConfig,
+) -> ContractDiffResult {
     let mut findings = Vec::new();
 
     // 1. Check every symbol in `base` against `head`
@@ -193,6 +205,34 @@ pub fn diff_contracts(base: &ContractSnapshot, head: &ContractSnapshot) -> Contr
         }
     }
 
+    // 3. Apply inline `// specter-ignore:` suppressions, `specter.toml` ignore rules/symbols,
+    //    and configurable per-rule severity overrides.
+    findings.retain_mut(|f| {
+        let rule_id = f.code.rule_id();
+        if config.is_rule_ignored(rule_id) || config.is_symbol_ignored(&f.symbol_id, &f.symbol_name)
+        {
+            return false;
+        }
+        let inline_suppressed = head
+            .symbols
+            .get(&f.symbol_id)
+            .is_some_and(|s| is_suppressed(&s.suppressions, rule_id))
+            || base
+                .symbols
+                .get(&f.symbol_id)
+                .is_some_and(|s| is_suppressed(&s.suppressions, rule_id));
+        if inline_suppressed {
+            return false;
+        }
+        if let Some(sev) = config.severity_override(rule_id) {
+            match sev.to_impact() {
+                Some(impact) => f.impact = impact,
+                None => return false,
+            }
+        }
+        true
+    });
+
     // Sort findings: MAJOR first, then MINOR, then by symbol_id
     findings.sort_by(|a, b| {
         b.impact
@@ -220,7 +260,7 @@ pub fn diff_contracts(base: &ContractSnapshot, head: &ContractSnapshot) -> Contr
     ContractDiffResult {
         base_fingerprint: base.contract_sha256.clone(),
         head_fingerprint: head.contract_sha256.clone(),
-        contract_mutated: base.contract_sha256 != head.contract_sha256,
+        contract_mutated: !findings.is_empty(),
         required_bump,
         breaking_count,
         minor_count,
@@ -228,6 +268,12 @@ pub fn diff_contracts(base: &ContractSnapshot, head: &ContractSnapshot) -> Contr
         symbols_head_count: head.symbols.len(),
         findings,
     }
+}
+
+fn is_suppressed(suppressions: &[String], rule_id: &str) -> bool {
+    suppressions
+        .iter()
+        .any(|s| s == "*" || s.eq_ignore_ascii_case(rule_id))
 }
 
 fn diff_single_symbol(
@@ -257,10 +303,14 @@ fn diff_single_symbol(
         });
     }
 
-    // 2. Check return type mutation
-    if base.return_type != head.return_type {
+    // 1b. Check Rust `#[non_exhaustive]` added to a previously exhaustive struct/enum (MAJOR)
+    if head.language == Language::Rust
+        && matches!(head.kind, SymbolKind::Struct | SymbolKind::Enum)
+        && !base.is_non_exhaustive
+        && head.is_non_exhaustive
+    {
         findings.push(ContractFinding {
-            code: ChangeCode::ReturnTypeChanged,
+            code: ChangeCode::FieldBecameRequired,
             impact: SemverImpact::Major,
             symbol_id: head.id.clone(),
             symbol_name: head.name.clone(),
@@ -268,13 +318,40 @@ fn diff_single_symbol(
             language: head.language,
             file: head.file.clone(),
             line: head.line,
-            before: base.return_type.clone(),
-            after: head.return_type.clone(),
+            before: format!("exhaustive {} {}", base.kind.as_str(), base.name),
+            after: format!("#[non_exhaustive] {} {}", head.kind.as_str(), head.name),
             reason: format!(
-                "Return/value type of `{}` mutated from `{}` to `{}`",
-                head.name, base.return_type, head.return_type
+                "Added `#[non_exhaustive]` to previously exhaustive {} `{}` (breaks downstream exhaustive matching/construction)",
+                head.kind.as_str(),
+                head.name
             ),
         });
+    }
+
+    // 2. Check return type mutation (with TypeScript covariance: narrowing `T | U` -> `T` is compatible)
+    if base.return_type != head.return_type {
+        let is_covariant_ts_narrowing = head.language == Language::TypeScript
+            && matches!(head.kind, SymbolKind::Function | SymbolKind::Method)
+            && is_ts_union_subset(&head.return_type, &base.return_type);
+
+        if !is_covariant_ts_narrowing {
+            findings.push(ContractFinding {
+                code: ChangeCode::ReturnTypeChanged,
+                impact: SemverImpact::Major,
+                symbol_id: head.id.clone(),
+                symbol_name: head.name.clone(),
+                symbol_kind: head.kind.clone(),
+                language: head.language,
+                file: head.file.clone(),
+                line: head.line,
+                before: base.return_type.clone(),
+                after: head.return_type.clone(),
+                reason: format!(
+                    "Return/value type of `{}` mutated from `{}` to `{}`",
+                    head.name, base.return_type, head.return_type
+                ),
+            });
+        }
     }
 
     // 3. Check function parameters positionally
@@ -313,26 +390,50 @@ fn diff_params(base: &PublicSymbol, head: &PublicSymbol, findings: &mut Vec<Cont
                 ),
             });
         } else if bp.ty != hp.ty {
-            findings.push(ContractFinding {
-                code: ChangeCode::ParamTypeChanged,
-                impact: SemverImpact::Major,
-                symbol_id: head.id.clone(),
-                symbol_name: head.name.clone(),
-                symbol_kind: head.kind.clone(),
-                language: head.language,
-                file: head.file.clone(),
-                line: head.line,
-                before: format!("{}: {}", bp.name, bp.ty),
-                after: format!("{}: {}", hp.name, hp.ty),
-                reason: format!(
-                    "Parameter #{idx} (`{name}`) in `{fn_name}` changed type from `{old}` to `{new}`",
-                    idx = i + 1,
-                    name = hp.name,
-                    fn_name = head.name,
-                    old = bp.ty,
-                    new = hp.ty
-                ),
-            });
+            // TypeScript contravariance: widening parameter type `T` -> `T | U` is backward-compatible (MINOR)
+            if head.language == Language::TypeScript && is_ts_union_subset(&bp.ty, &hp.ty) {
+                findings.push(ContractFinding {
+                    code: ChangeCode::OptionalMemberAdded,
+                    impact: SemverImpact::Minor,
+                    symbol_id: head.id.clone(),
+                    symbol_name: head.name.clone(),
+                    symbol_kind: head.kind.clone(),
+                    language: head.language,
+                    file: head.file.clone(),
+                    line: head.line,
+                    before: format!("{}: {}", bp.name, bp.ty),
+                    after: format!("{}: {}", hp.name, hp.ty),
+                    reason: format!(
+                        "Parameter #{idx} (`{name}`) in `{fn_name}` widened compatibly from `{old}` to `{new}` (contravariant)",
+                        idx = i + 1,
+                        name = hp.name,
+                        fn_name = head.name,
+                        old = bp.ty,
+                        new = hp.ty
+                    ),
+                });
+            } else {
+                findings.push(ContractFinding {
+                    code: ChangeCode::ParamTypeChanged,
+                    impact: SemverImpact::Major,
+                    symbol_id: head.id.clone(),
+                    symbol_name: head.name.clone(),
+                    symbol_kind: head.kind.clone(),
+                    language: head.language,
+                    file: head.file.clone(),
+                    line: head.line,
+                    before: format!("{}: {}", bp.name, bp.ty),
+                    after: format!("{}: {}", hp.name, hp.ty),
+                    reason: format!(
+                        "Parameter #{idx} (`{name}`) in `{fn_name}` changed type from `{old}` to `{new}`",
+                        idx = i + 1,
+                        name = hp.name,
+                        fn_name = head.name,
+                        old = bp.ty,
+                        new = hp.ty
+                    ),
+                });
+            }
         } else if !bp.optional && hp.optional {
             findings.push(ContractFinding {
                 code: ChangeCode::OptionalMemberAdded,
@@ -487,7 +588,49 @@ fn diff_fields(base: &PublicSymbol, head: &PublicSymbol, findings: &mut Vec<Cont
 
     for (name, hf) in &head_map {
         if !base_map.contains_key(name) {
-            if hf.optional || head.kind == SymbolKind::Interface {
+            if head.language == Language::Rust
+                && matches!(head.kind, SymbolKind::Struct | SymbolKind::Enum)
+            {
+                if base.is_non_exhaustive || head.is_non_exhaustive {
+                    findings.push(ContractFinding {
+                        code: ChangeCode::OptionalMemberAdded,
+                        impact: SemverImpact::Minor,
+                        symbol_id: head.id.clone(),
+                        symbol_name: head.name.clone(),
+                        symbol_kind: head.kind.clone(),
+                        language: head.language,
+                        file: head.file.clone(),
+                        line: head.line,
+                        before: "(none)".to_string(),
+                        after: format!("{}: {}", hf.name, hf.ty),
+                        reason: format!(
+                            "New public member `{}` added to #[non_exhaustive] {} `{}` (backward-compatible)",
+                            hf.name,
+                            head.kind.as_str(),
+                            head.name
+                        ),
+                    });
+                } else {
+                    findings.push(ContractFinding {
+                        code: ChangeCode::FieldBecameRequired,
+                        impact: SemverImpact::Major,
+                        symbol_id: head.id.clone(),
+                        symbol_name: head.name.clone(),
+                        symbol_kind: head.kind.clone(),
+                        language: head.language,
+                        file: head.file.clone(),
+                        line: head.line,
+                        before: "(exhaustive)".to_string(),
+                        after: format!("{}: {}", hf.name, hf.ty),
+                        reason: format!(
+                            "New public member `{}` added to exhaustive {} `{}` without #[non_exhaustive] (breaks downstream match/struct literals)",
+                            hf.name,
+                            head.kind.as_str(),
+                            head.name
+                        ),
+                    });
+                }
+            } else if hf.optional || head.kind == SymbolKind::Interface {
                 findings.push(ContractFinding {
                     code: ChangeCode::OptionalMemberAdded,
                     impact: SemverImpact::Minor,
@@ -512,7 +655,6 @@ fn diff_fields(base: &PublicSymbol, head: &PublicSymbol, findings: &mut Vec<Cont
                     ),
                 });
             } else {
-                // Adding a non-optional field to a Rust `pub struct` or variant to exhaustive `pub enum`
                 findings.push(ContractFinding {
                     code: ChangeCode::OptionalMemberAdded,
                     impact: SemverImpact::Minor,
