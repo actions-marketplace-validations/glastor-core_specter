@@ -6,14 +6,14 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center max-w-3xl mx-auto mb-16">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan text-xs font-mono mb-4">
-        <span class="material-symbols-outlined text-sm">terminal</span>
+        <span class="material-symbols-outlined notranslate text-sm" translate="no" aria-hidden="true">terminal</span>
         <span>INTERACTIVE SIMULATOR</span>
       </div>
       <h2 class="font-display font-black text-3xl sm:text-5xl text-white tracking-tight mb-4">
         Catch Trojan Breaking Changes in Real-Time
       </h2>
       <p class="font-sans text-slate-300 text-base sm:text-lg">
-        See how Specter's AST engine catches breaking changes hiding behind harmless <code class="px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan font-mono text-xs">fix:</code> or <code class="px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan font-mono text-xs">chore:</code> commit titles before they reach production.
+        See how Specter's AST engine catches breaking changes hiding behind harmless <code class="notranslate px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan font-mono text-xs" translate="no">fix:</code> or <code class="notranslate px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan font-mono text-xs" translate="no">chore:</code> commit titles before they reach production.
       </p>
     </div>
 
@@ -28,7 +28,7 @@
             class="lang-tab px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-2 bg-cyber-indigo text-white shadow-sm transition-all"
             data-lang="rust"
           >
-            <span class="material-symbols-outlined text-sm">code</span>
+            <span class="material-symbols-outlined notranslate text-sm" translate="no" aria-hidden="true">code</span>
             <span>Rust (auth.rs)</span>
           </button>
           <button
@@ -36,7 +36,7 @@
             class="lang-tab px-3.5 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-2 bg-cyber-card text-slate-400 hover:text-slate-200 border border-cyber-border transition-all"
             data-lang="ts"
           >
-            <span class="material-symbols-outlined text-sm">javascript</span>
+            <span class="material-symbols-outlined notranslate text-sm" translate="no" aria-hidden="true">javascript</span>
             <span>TypeScript (client.ts)</span>
           </button>
         </div>
@@ -44,7 +44,7 @@
         <!-- Mode Indicator Badge -->
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono font-semibold">
-            <span class="material-symbols-outlined text-sm">gpp_bad</span>
+            <span class="material-symbols-outlined notranslate text-sm" translate="no" aria-hidden="true">gpp_bad</span>
             <span id="trojan-indicator">TROJAN DETECTED: fix(...) hiding MAJOR</span>
           </div>
           <span class="text-xs text-slate-400 font-mono hidden sm:inline">&lt; 3.2 ms</span>
@@ -57,7 +57,7 @@
         <div class="p-6 bg-slate-950/80">
           <div class="flex items-center justify-between mb-4">
             <span class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm text-cyber-indigo">difference</span>
+              <span class="material-symbols-outlined notranslate text-sm text-cyber-indigo" translate="no" aria-hidden="true">difference</span>
               <span>Git Public API Surface Diff</span>
             </span>
             <span class="text-[11px] font-mono text-amber-400 px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/30">
@@ -98,7 +98,7 @@
         <div class="p-6 bg-slate-900/60">
           <div class="flex items-center justify-between mb-4">
             <span class="text-xs font-mono text-slate-400 flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-sm text-cyber-cyan">verified</span>
+              <span class="material-symbols-outlined notranslate text-sm text-cyber-cyan" translate="no" aria-hidden="true">verified</span>
               <span>Specter AST Gate Report</span>
             </span>
             <span class="text-[11px] font-mono text-rose-400 px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/30 font-bold">
@@ -118,13 +118,13 @@
             </div>
 
             <div class="p-2.5 rounded bg-rose-950/30 border border-rose-900/40 text-rose-300 text-[11px] leading-relaxed" id="audit-trojan">
-              <strong>Trojan Mismatch:</strong> Commit claims <code>PATCH</code> (<span class="text-white">fix</span>), but AST requires <strong class="text-white">MAJOR (v1.0.0)</strong>. PR gate failed to protect downstream consumers.
+              <strong>Trojan Mismatch:</strong> Commit claims <code class="notranslate" translate="no">PATCH</code> (<span class="text-white">fix</span>), but AST requires <strong class="text-white">MAJOR (v1.0.0)</strong>. PR gate failed to protect downstream consumers.
             </div>
 
             <div class="pt-2 text-slate-400 text-[11px]">
               <div class="text-slate-300 font-semibold mb-1">Recommended Migration Guide:</div>
               <p id="audit-migration" class="text-slate-400">
-                Retain original signature and introduce a new overload or <code>verify_session_with_opts(...)</code> to maintain backward compatibility.
+                Retain original signature and introduce a new overload or <code class="notranslate" translate="no">verify_session_with_opts(...)</code> to maintain backward compatibility.
               </p>
             </div>
           </div>
@@ -156,7 +156,7 @@
     if (auditRule && auditDesc && auditTrojan && auditMigration) {
       auditRule.textContent = 'Rule: SPC001 [MAJOR]';
       auditDesc.textContent = 'Public function parameter count changed from 1 to 2 without default argument.';
-      auditTrojan.innerHTML = '<strong>Trojan Mismatch:</strong> Commit claims <code>PATCH</code> (<span class="text-white">fix</span>), but AST requires <strong class="text-white">MAJOR (v1.0.0)</strong>. PR gate blocked to protect downstream consumers.';
+      auditTrojan.innerHTML = '<strong>Trojan Mismatch:</strong> Commit claims <code class="notranslate" translate="no">PATCH</code> (<span class="text-white">fix</span>), but AST requires <strong class="text-white">MAJOR (v1.0.0)</strong>. PR gate blocked to protect downstream consumers.';
       auditMigration.textContent = 'Retain original signature and introduce a new overload or verify_session_with_opts(...) to maintain backward compatibility.';
     }
   });
@@ -173,7 +173,7 @@
     if (auditRule && auditDesc && auditTrojan && auditMigration) {
       auditRule.textContent = 'Rule: SPC007 [MAJOR]';
       auditDesc.textContent = 'TypeScript interface property "timeoutMs" mutated from optional (?) to required (:).';
-      auditTrojan.innerHTML = '<strong>Trojan Mismatch:</strong> Commit claims <code>chore</code>, but mutating optional field to required breaks all object instantiation without it.';
+      auditTrojan.innerHTML = '<strong>Trojan Mismatch:</strong> Commit claims <code class="notranslate" translate="no">chore</code>, but mutating optional field to required breaks all object instantiation without it.';
       auditMigration.textContent = 'Keep timeoutMs optional with a fallback default value inside the client constructor.';
     }
   });
