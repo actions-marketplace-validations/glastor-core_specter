@@ -8,6 +8,8 @@
   <img src="https://res.cloudinary.com/dzualplqi/image/upload/v1794597633/specter_lqfmhu.png" alt="GLASTOR® Specter — Polyglot AST API Contract Differ" width="100%" style="border-radius: 8px;">
 </p>
 
+[![Live Landing](https://img.shields.io/badge/Web-specter.glastor.es-00e5ff?style=flat-square&logo=cloudflare)](https://specter.glastor.es)
+[![0% FPR Gate](https://img.shields.io/badge/Golden_FPR_Gate-105%2F105_(0%25_FPR)-10b981?style=flat-square)](./ROADMAP.md)
 [![Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-GLASTOR%C2%AE%20Specter-blue?logo=github-actions&logoColor=white)](https://github.com/marketplace/actions/glastor-specter-polyglot-ast-api-contract-semver-gatekeeper)
 [![CI & API Contract Audit](https://github.com/glastor-core/specter/actions/workflows/audit.yml/badge.svg)](https://github.com/glastor-core/specter/actions/workflows/audit.yml)
 [![crates.io version](https://img.shields.io/crates/v/specter-cli?style=flat-square&color=orange&logo=rust)](https://crates.io/crates/specter-cli)
@@ -56,17 +58,19 @@ Modern CI/CD pipelines blindly trust human or AI-authored commit messages (`fix:
 
 ---
 
-## ⚡ Key Capabilities
+## ⚡ Key Capabilities (`v1.0.0`)
 
-1. **Zero-Compiler Polyglot Surface Extraction (`< 5 ms`)**:
-   - **Rust**: Extracts `pub fn`, `pub async fn`, `pub const fn`, `pub struct` (and `pub` fields), `pub enum` (and variants), `pub trait`, `pub type`, and `pub const` while automatically ignoring `pub(crate)`, private items, and `#[cfg(test)]` modules.
-   - **TypeScript / Deno**: Extracts `export function`, `export async function`, `export interface`, `export class`, `export enum`, `export type`, and `export const`, tracking optional parameters (`?`), default values (`= ...`), and rest parameters (`...args`).
-2. **Cryptographic Public Surface Fingerprinting (`Contract SHA-256`)**:
-   - Generates a canonical, formatting-independent `SHA-256` digest of your entire public API contract. Internal refactoring or code formatting (`cargo fmt` / `deno fmt`) never alters the fingerprint.
-3. **Trojan Breaking-Change Guard (`src/commit_guard.rs`)**:
-   - Cross-checks the developer's Conventional Commit (`fix:`, `feat:`, `chore:`) against the mathematical AST diff. If a `MAJOR` breaking mutation is disguised inside a non-breaking commit (without `!` or `BREAKING CHANGE:`), `specter` blocks the Pull Request immediately.
-4. **SARIF 2.1.0, CycloneDX 1.5 SBOM & PR Sticky Comments**:
-   - Emits inline GitHub Code Scanning annotations (`SPC001`–`SPC012`), CycloneDX 1.5 API Contract SBOMs, 14 `$GITHUB_OUTPUT` variables, and self-updating Pull Request Sticky Comments.
+1. **Zero-Compiler Official AST Extraction (`syn 3` + `oxc_parser`)**:
+   - **Rust 2024 (`syn`)**: Parses the full official Rust grammar without invoking `rustc`—handling `pub fn`, `pub async fn`, `pub const fn`, `impl` methods, `pub struct`, `pub enum`, `#[non_exhaustive]`, `#[doc(hidden)]`, `pub(crate)`/`pub(super)`, `where` clauses, attributes (`#[serde(...)]`), and `#[cfg(test)]` anywhere in the file.
+   - **TypeScript / JS / Deno (`oxc_parser`)**: Sub-millisecond Rust AST resolving `export function`, exported arrow functions (`export const fn = (...) => ...`), classes, decorators, interfaces, enums, JSDoc `@internal`/`@private`, barrel re-exports, union normalization (`A | B == B | A`, `Array<T> == T[]`), and basic type variance (contravariant param widening → `MINOR`, covariant return narrowing → `PATCH`).
+2. **Entry-Point Reachability & Logical Symbol IDs (`src/reachability.rs`)**:
+   - Auto-discovers `Cargo.toml` (`[lib]` & `[workspace]`), `src/lib.rs`, `package.json` (`exports`/`main`), and `deno.json` (`exports`). Identifies symbols by their exported logical path (`crate::Client::send`, `pkg::Client::send`) so moving internal files behind `pub use` or barrel re-exports produces **zero false `SPC001`**.
+3. **Enterprise Config (`specter.toml`) & Auditable Inline Suppressions**:
+   - Configure `entry_points`, `ignore_paths`, `ignore_symbols`, `ignore_rules`, `strict_minor`, and per-rule `[rule_severity]` overrides, or suppress individual changes inline with mandatory PR reason: `// specter-ignore: SPC005 -- RFC-42 migration`.
+4. **0% False-Positive Golden Gate & Trojan Breaking-Change Guard**:
+   - Verified by a **105-case Golden Regression Suite (0.00% FPR)** and cross-checked against Conventional Commits (`fix:`, `feat:`, `chore:`) to block disguised `MAJOR` breaking changes.
+5. **SARIF 2.1.0, CycloneDX 1.5 SBOM & PR Sticky Comments**:
+   - Emits inline GitHub Code Scanning annotations (`SPC001`–`SPC013`), CycloneDX 1.5 API Contract SBOMs, 14 `$GITHUB_OUTPUT` variables, and self-updating Pull Request Sticky Comments. See [ROADMAP.md](./ROADMAP.md) for v1.0 metrics and Post-1.0 Go/Python expansion.
 
 ---
 

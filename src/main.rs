@@ -1,15 +1,22 @@
 pub mod commit_guard;
+pub mod config;
 pub mod differ;
 pub mod extractor;
+#[cfg(test)]
+mod golden_fpr_suite;
+pub mod reachability;
 pub mod report;
+mod rust_ast;
+mod ts_ast;
 
 use anyhow::{Context, Result};
 use clap::Parser;
 use commit_guard::evaluate_commit_alignment;
-use differ::diff_contracts;
+use config::SpecterConfig;
+use differ::diff_contracts_with_config;
 use extractor::{
-    ContractSnapshot, detect_language, extract_directory_contract, extract_in_memory_files,
-    should_skip_dir, should_skip_file,
+    ContractSnapshot, detect_language, extract_directory_contract_with_config,
+    extract_in_memory_files_with_config, should_skip_dir, should_skip_file,
 };
 use report::{
     AuditVerdict, SpecterAuditReport, emit_github_telemetry, render_markdown_report,
@@ -61,8 +68,17 @@ pub struct CliArgs {
     pub fail_on_trojan: bool,
 
     /// Also fail if a MINOR public symbol addition is disguised as a PATCH commit (fix/chore)
-    #[arg(long, env = "INPUT_STRICT_SEMVER", default_value_t = false)]
+    #[arg(
+        long,
+        alias = "strict-minor",
+        env = "INPUT_STRICT_SEMVER",
+        default_value_t = false
+    )]
     pub strict_semver: bool,
+
+    /// Optional explicit path to a `specter.toml` configuration file
+    #[arg(long, env = "INPUT_CONFIG", default_value = "")]
+    pub config: String,
 
     /// Optional path to export full JSON audit telemetry
     #[arg(long, env = "INPUT_OUTPUT_JSON", default_value = "")]
@@ -104,12 +120,20 @@ fn run() -> Result<ExitCode> {
     let args = CliArgs::parse();
 
     let head_path = Path::new(args.head_dir.trim());
-    let head_snapshot = extract_directory_contract(head_path).with_context(|| {
-        format!(
-            "Failed to extract HEAD API contract from {}",
-            head_path.display()
-        )
-    })?;
+    let config = if !args.config.trim().is_empty() {
+        SpecterConfig::load_from_file(Path::new(args.config.trim()))?
+    } else {
+        SpecterConfig::load_from_dir(head_path)?
+    };
+    let strict_minor = args.strict_semver || config.strict_minor;
+
+    let head_snapshot =
+        extract_directory_contract_with_config(head_path, &config).with_context(|| {
+            format!(
+                "Failed to extract HEAD API contract from {}",
+                head_path.display()
+            )
+        })?;
 
     // Save current snapshot if requested
     if !args.save_snapshot.trim().is_empty() {
@@ -123,16 +147,16 @@ fn run() -> Result<ExitCode> {
     }
 
     // Resolve BASE snapshot from (1) --baseline-json, (2) --base-dir, (3) --base-ref, or fallback to HEAD
-    let base_snapshot = resolve_base_snapshot(&args, &head_snapshot)?;
+    let base_snapshot = resolve_base_snapshot(&args, &head_snapshot, &config)?;
 
-    let diff = diff_contracts(&base_snapshot, &head_snapshot);
+    let diff = diff_contracts_with_config(&base_snapshot, &head_snapshot, &config);
 
     // Resolve commit message (from CLI flag or fallback to git log -1 if available)
     let resolved_commit_msg = resolve_commit_message(&args.commit_message);
     let commit_guard = evaluate_commit_alignment(
         diff.required_bump,
         resolved_commit_msg.as_deref(),
-        args.strict_semver,
+        strict_minor,
     );
 
     let mut failure_reasons = Vec::new();
@@ -145,7 +169,7 @@ fn run() -> Result<ExitCode> {
     if args.fail_on_trojan && commit_guard.trojan_breaking {
         failure_reasons.push(commit_guard.summary.clone());
     }
-    if args.strict_semver && !commit_guard.aligned && !commit_guard.trojan_breaking {
+    if strict_minor && !commit_guard.aligned && !commit_guard.trojan_breaking {
         failure_reasons.push(commit_guard.summary.clone());
     }
 
@@ -228,6 +252,7 @@ fn run() -> Result<ExitCode> {
 fn resolve_base_snapshot(
     args: &CliArgs,
     head_fallback: &ContractSnapshot,
+    config: &SpecterConfig,
 ) -> Result<ContractSnapshot> {
     // 1. Check --baseline-json if file exists
     let baseline_json = args.baseline_json.trim();
@@ -246,14 +271,15 @@ fn resolve_base_snapshot(
     if !base_dir.is_empty() {
         let p = Path::new(base_dir);
         if p.exists() {
-            return extract_directory_contract(p);
+            return extract_directory_contract_with_config(p, config);
         }
     }
 
     // 3. Check --base-ref via git archive / git worktree if provided
     let base_ref = args.base_ref.trim();
     if !base_ref.is_empty()
-        && let Ok(snap) = extract_git_ref_contract(Path::new(args.head_dir.trim()), base_ref)
+        && let Ok(snap) =
+            extract_git_ref_contract(Path::new(args.head_dir.trim()), base_ref, config)
     {
         return Ok(snap);
     }
@@ -264,7 +290,11 @@ fn resolve_base_snapshot(
 
 /// Zero-Disk In-Memory Git Ref Extractor: reads source blobs directly from the Git object store
 /// via `git ls-tree` and `git show` without creating any temporary worktrees on disk.
-fn extract_git_ref_contract(repo_dir: &Path, git_ref: &str) -> Result<ContractSnapshot> {
+fn extract_git_ref_contract(
+    repo_dir: &Path,
+    git_ref: &str,
+    config: &SpecterConfig,
+) -> Result<ContractSnapshot> {
     let ls_out = Command::new("git")
         .current_dir(repo_dir)
         .args(["ls-tree", "-r", "--name-only", git_ref])
@@ -283,17 +313,23 @@ fn extract_git_ref_contract(repo_dir: &Path, git_ref: &str) -> Result<ContractSn
         if rel_path.is_empty() {
             continue;
         }
-        let p = Path::new(&rel_path);
-        let file_name = p
-            .file_name()
-            .map(|n| n.to_string_lossy().to_string())
-            .unwrap_or_default();
-        if should_skip_file(&file_name)
-            || p.components()
-                .any(|c| should_skip_dir(&c.as_os_str().to_string_lossy()))
-            || detect_language(p).is_none()
-        {
-            continue;
+        let is_manifest = matches!(
+            rel_path.as_str(),
+            "Cargo.toml" | "package.json" | "deno.json" | "deno.jsonc"
+        );
+        if !is_manifest {
+            let p = Path::new(&rel_path);
+            let file_name = p
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_default();
+            if should_skip_file(&file_name)
+                || p.components()
+                    .any(|c| should_skip_dir(&c.as_os_str().to_string_lossy()))
+                || detect_language(p).is_none()
+            {
+                continue;
+            }
         }
 
         let spec = format!("{}:{}", git_ref, rel_path);
@@ -308,7 +344,10 @@ fn extract_git_ref_contract(repo_dir: &Path, git_ref: &str) -> Result<ContractSn
         }
     }
 
-    Ok(extract_in_memory_files(&in_memory_files))
+    Ok(extract_in_memory_files_with_config(
+        &in_memory_files,
+        config,
+    ))
 }
 
 fn resolve_commit_message(explicit: &str) -> Option<String> {
@@ -830,5 +869,662 @@ mod tests {
         assert!(md.contains("feat(net)!: update public API surface contract"));
         assert!(md.contains("BREAKING CHANGE:"));
         assert!(md.contains("[SPC004]"));
+    }
+
+    #[test]
+    fn test_21_rust_lifetimes_raw_strings_and_nested_block_comments() {
+        let code = r####"
+/* outer comment /* nested comment
+pub fn fake_inside_nested() -> bool { false }
+*/ still inside outer comment
+pub fn also_fake() -> bool { false }
+*/
+pub fn parse<'a>(input: &'a str) -> &'a str {
+    // comment after lifetime 'a should still be stripped!
+    let _raw = r#"
+pub fn fake_inside_raw_string() -> u32 { 42 }
+"#;
+    let _ch = '\'';
+    input
+}
+"####;
+        let syms = extract_from_source(code, "src/parser.rs", Language::Rust);
+        assert_eq!(syms.len(), 1, "Expected only `parse`, got: {:?}", syms);
+        assert_eq!(syms[0].name, "parse");
+        assert_eq!(syms[0].params[0].ty, "&'0 str");
+        assert_eq!(syms[0].return_type, "&'0 str");
+    }
+
+    #[test]
+    fn test_22_ignore_rust_doc_hidden_items_methods_and_fields() {
+        let code = r#"
+#[doc(hidden)]
+pub fn internal_macro_helper() -> bool { true }
+
+pub struct Client {
+    pub endpoint: String,
+    #[doc(hidden)]
+    pub __internal_token: String,
+}
+
+impl Client {
+    pub fn send(&self, body: &str) -> bool { true }
+
+    #[doc(hidden)]
+    #[inline]
+    pub fn __debug_dump(&self) {}
+}
+"#;
+        let syms = extract_from_source(code, "src/client.rs", Language::Rust);
+        assert_eq!(
+            syms.len(),
+            2,
+            "Expected only Client and Client::send, got: {:?}",
+            syms
+        );
+        let client_struct = syms.iter().find(|s| s.kind == SymbolKind::Struct).unwrap();
+        assert_eq!(client_struct.fields.len(), 1);
+        assert_eq!(client_struct.fields[0].name, "endpoint");
+        assert!(syms.iter().any(|s| s.name == "Client::send"));
+    }
+
+    #[test]
+    fn test_23_ignore_ts_jsdoc_internal_and_private_exports() {
+        let code = r#"
+/**
+ * Internal helper used by tests
+ * @internal
+ */
+export function _internalBoot(): void {}
+
+/** @private */
+export const SECRET_FLAG: boolean = true;
+
+export class Engine {
+    /** @internal */
+    public debugState: string;
+    public version: string;
+
+    /** @internal */
+    public resetInternal(): void {}
+
+    public run(input: string): boolean {
+        return true;
+    }
+}
+"#;
+        let syms = extract_from_source(code, "src/engine.ts", Language::TypeScript);
+        assert_eq!(
+            syms.len(),
+            2,
+            "Expected Engine class and Engine::run, got: {:?}",
+            syms
+        );
+        let cls = syms.iter().find(|s| s.kind == SymbolKind::Class).unwrap();
+        assert_eq!(cls.fields.len(), 1);
+        assert_eq!(cls.fields[0].name, "version");
+        assert!(syms.iter().any(|s| s.name == "Engine::run"));
+    }
+
+    #[test]
+    fn test_24_rust_struct_and_enum_attributes_do_not_drop_fields() {
+        let base_files = vec![(
+            "src/model.rs".to_string(),
+            r#"
+pub struct User {
+    pub id: u64,
+    pub email: String,
+}
+pub enum Status {
+    Active,
+    Disabled,
+}
+"#
+            .to_string(),
+        )];
+        let head_files = vec![(
+            "src/model.rs".to_string(),
+            r#"
+pub struct User {
+    #[serde(rename = "user_id")]
+    pub id: u64,
+    #[serde(default, alias = "mail,addr")]
+    pub email: String,
+}
+pub enum Status {
+    #[serde(rename = "active")]
+    Active,
+    Disabled,
+}
+"#
+            .to_string(),
+        )];
+
+        let base_snap = extract_in_memory_files(&base_files);
+        let head_snap = extract_in_memory_files(&head_files);
+        let diff = diff_contracts(&base_snap, &head_snap);
+
+        assert_eq!(diff.required_bump, SemverImpact::Patch);
+        assert!(!diff.contract_mutated);
+        assert_eq!(diff.breaking_count, 0);
+    }
+
+    #[test]
+    fn test_25_ts_class_brace_depth_ignores_nested_helpers() {
+        let code = r#"
+export class Gateway {
+    public async dispatch(url: string): Promise<number> {
+        const helper = {
+            nestedCall(x: number) {
+                return x + 1;
+            }
+        };
+        function innerLocal(a: string) {
+            return a.length;
+        }
+        return helper.nestedCall(innerLocal(url));
+    }
+}
+"#;
+        let syms = extract_from_source(code, "src/gateway.ts", Language::TypeScript);
+        let methods: Vec<_> = syms
+            .iter()
+            .filter(|s| s.kind == SymbolKind::Method)
+            .collect();
+        assert_eq!(
+            methods.len(),
+            1,
+            "Nested helpers must not be extracted as class methods: {:?}",
+            methods
+        );
+        assert_eq!(methods[0].name, "Gateway::dispatch");
+    }
+
+    #[test]
+    fn test_26_const_value_changes_do_not_trigger_breaking_change() {
+        let base_files = vec![
+            (
+                "src/lib.rs".to_string(),
+                "pub const VERSION: &str = \"0.8.1\";\npub const MAX_CONN: usize = 32;".to_string(),
+            ),
+            (
+                "src/mod.ts".to_string(),
+                "export const VERSION = \"0.8.1\";\nexport const MAX_RETRIES: number = 3;"
+                    .to_string(),
+            ),
+        ];
+        let head_files = vec![
+            (
+                "src/lib.rs".to_string(),
+                "pub const VERSION: &str = \"0.9.0\";\npub const MAX_CONN: usize = 64;".to_string(),
+            ),
+            (
+                "src/mod.ts".to_string(),
+                "export const VERSION = \"0.9.0\";\nexport const MAX_RETRIES: number = 5;"
+                    .to_string(),
+            ),
+        ];
+
+        let base_snap = extract_in_memory_files(&base_files);
+        let head_snap = extract_in_memory_files(&head_files);
+        let diff = diff_contracts(&base_snap, &head_snap);
+
+        assert_eq!(diff.required_bump, SemverImpact::Patch);
+        assert!(!diff.contract_mutated);
+
+        // Changing the annotated type of a const MUST still be MAJOR (SPC006)
+        let breaking_head = vec![(
+            "src/mod.ts".to_string(),
+            "export const VERSION = \"0.9.0\";\nexport const MAX_RETRIES: string = \"5\";"
+                .to_string(),
+        )];
+        let ts_base = extract_in_memory_files(&base_files[1..]);
+        let ts_head = extract_in_memory_files(&breaking_head);
+        let ts_diff = diff_contracts(&ts_base, &ts_head);
+        assert_eq!(ts_diff.required_bump, SemverImpact::Major);
+        assert_eq!(ts_diff.findings[0].code, ChangeCode::ReturnTypeChanged);
+    }
+
+    #[test]
+    fn test_27_canonical_signature_ignores_param_lifetime_and_generic_renames() {
+        let base_files = vec![(
+            "src/api.rs".to_string(),
+            "pub fn transform<'a, T: Clone, U>(input: &'a str, item: T, extra: U) -> Result<&'a str, U> { Ok(input) }".to_string(),
+        )];
+        let head_files = vec![(
+            "src/api.rs".to_string(),
+            "pub fn transform<'buf, Item: Clone, Err>(source: &'buf str, value: Item, err: Err) -> Result<&'buf str, Err> { Ok(source) }".to_string(),
+        )];
+
+        let base_snap = extract_in_memory_files(&base_files);
+        let head_snap = extract_in_memory_files(&head_files);
+        let diff = diff_contracts(&base_snap, &head_snap);
+
+        assert_eq!(diff.required_bump, SemverImpact::Patch);
+        assert!(!diff.contract_mutated);
+        assert_eq!(diff.breaking_count, 0);
+    }
+
+    #[test]
+    fn test_28_canonical_ts_unions_and_array_syntax() {
+        let base_files = vec![(
+            "src/api.ts".to_string(),
+            r#"
+export function normalize<T>(items: Array<string | number>, value: T): Promise<Array<number | string>> {
+    return Promise.resolve(items);
+}
+export type Id = string | number;
+"#
+            .to_string(),
+        )];
+        let head_files = vec![(
+            "src/api.ts".to_string(),
+            r#"
+export function normalize<Item>(list: (number | string)[], v: Item): Promise<(string | number)[]> {
+    return Promise.resolve(list);
+}
+export type Id = number | string;
+"#
+            .to_string(),
+        )];
+
+        let base_snap = extract_in_memory_files(&base_files);
+        let head_snap = extract_in_memory_files(&head_files);
+        let diff = diff_contracts(&base_snap, &head_snap);
+
+        assert_eq!(diff.required_bump, SemverImpact::Patch);
+        assert!(!diff.contract_mutated);
+        assert_eq!(diff.breaking_count, 0);
+    }
+
+    #[test]
+    fn test_29_rust_syn_cfg_test_middle_of_file_and_pub_crate() {
+        let code = r#"
+pub fn before_tests(x: u32) -> u32 { x }
+
+#[cfg(test)]
+mod tests {
+    pub fn test_helper_ignored() -> bool { true }
+}
+
+pub(crate) fn crate_only() -> bool { false }
+pub(super) fn super_only() -> bool { false }
+
+mod private_mod {
+    pub fn hidden_inside_private_mod() -> bool { false }
+}
+
+pub fn after_tests<T>(val: T) -> T
+where
+    T: Clone + Send,
+{
+    val
+}
+"#;
+        let syms = extract_from_source(code, "src/lib.rs", Language::Rust);
+        let names: Vec<_> = syms.iter().map(|s| s.name.as_str()).collect();
+        assert_eq!(
+            names,
+            vec!["before_tests", "after_tests"],
+            "Expected only truly public items before & after #[cfg(test)], got: {:?}",
+            names
+        );
+    }
+
+    #[test]
+    fn test_30_rust_non_exhaustive_enum_and_struct_semver() {
+        // 1. Exhaustive enum adding a variant -> MAJOR
+        let base_ex = vec![(
+            "src/err.rs".to_string(),
+            "pub enum ApiError { NotFound, Timeout }".to_string(),
+        )];
+        let head_ex = vec![(
+            "src/err.rs".to_string(),
+            "pub enum ApiError { NotFound, Timeout, RateLimited }".to_string(),
+        )];
+        let diff_ex = diff_contracts(
+            &extract_in_memory_files(&base_ex),
+            &extract_in_memory_files(&head_ex),
+        );
+        assert_eq!(diff_ex.required_bump, SemverImpact::Major);
+        assert_eq!(diff_ex.breaking_count, 1);
+
+        // 2. #[non_exhaustive] enum adding a variant -> MINOR
+        let base_ne = vec![(
+            "src/err.rs".to_string(),
+            "#[non_exhaustive]\npub enum ApiError { NotFound, Timeout }".to_string(),
+        )];
+        let head_ne = vec![(
+            "src/err.rs".to_string(),
+            "#[non_exhaustive]\npub enum ApiError { NotFound, Timeout, RateLimited }".to_string(),
+        )];
+        let diff_ne = diff_contracts(
+            &extract_in_memory_files(&base_ne),
+            &extract_in_memory_files(&head_ne),
+        );
+        assert_eq!(diff_ne.required_bump, SemverImpact::Minor);
+        assert_eq!(diff_ne.breaking_count, 0);
+
+        // 3. #[non_exhaustive] struct adding a pub field -> MINOR
+        let base_st = vec![(
+            "src/cfg.rs".to_string(),
+            "#[non_exhaustive]\npub struct Config { pub host: String }".to_string(),
+        )];
+        let head_st = vec![(
+            "src/cfg.rs".to_string(),
+            "#[non_exhaustive]\npub struct Config { pub host: String, pub port: u16 }".to_string(),
+        )];
+        let diff_st = diff_contracts(
+            &extract_in_memory_files(&base_st),
+            &extract_in_memory_files(&head_st),
+        );
+        assert_eq!(diff_st.required_bump, SemverImpact::Minor);
+        assert_eq!(diff_st.breaking_count, 0);
+
+        // 4. Adding #[non_exhaustive] to a previously exhaustive enum -> MAJOR
+        let diff_added_ne = diff_contracts(
+            &extract_in_memory_files(&base_ex),
+            &extract_in_memory_files(&base_ne),
+        );
+        assert_eq!(diff_added_ne.required_bump, SemverImpact::Major);
+    }
+
+    #[test]
+    fn test_31_ts_oxc_arrow_functions_destructuring_and_decorators() {
+        let code = r#"
+export const fetchUser = async <T>(id: string, { retry = true }: { retry?: boolean }): Promise<T> => {
+    return {} as T;
+};
+
+/** @internal */
+export const internalArrow = (x: number): number => x * 2;
+
+@sealed
+export class Service {
+    @log
+    public execute(payload: string): boolean {
+        return true;
+    }
+}
+"#;
+        let syms = extract_from_source(code, "src/service.ts", Language::TypeScript);
+        let arrow = syms
+            .iter()
+            .find(|s| s.name == "fetchUser")
+            .expect("Expected exported arrow function fetchUser");
+        assert_eq!(arrow.kind, SymbolKind::Function);
+        assert!(arrow.is_async);
+        assert_eq!(arrow.params.len(), 2);
+        assert_eq!(arrow.return_type, "Promise<T0>");
+        assert!(!syms.iter().any(|s| s.name == "internalArrow"));
+        assert!(syms.iter().any(|s| s.name == "Service::execute"));
+    }
+
+    #[test]
+    fn test_32_ts_contravariant_param_widening_is_minor() {
+        let base_files = vec![(
+            "src/api.ts".to_string(),
+            "export function lookup(id: string): boolean { return true; }".to_string(),
+        )];
+        let head_files = vec![(
+            "src/api.ts".to_string(),
+            "export function lookup(id: string | number): boolean { return true; }".to_string(),
+        )];
+
+        let diff = diff_contracts(
+            &extract_in_memory_files(&base_files),
+            &extract_in_memory_files(&head_files),
+        );
+        assert_eq!(diff.required_bump, SemverImpact::Minor);
+        assert_eq!(diff.breaking_count, 0);
+        assert_eq!(diff.findings[0].code, ChangeCode::OptionalMemberAdded);
+    }
+
+    #[test]
+    fn test_33_ts_covariant_return_narrowing_is_compatible() {
+        let base_files = vec![(
+            "src/api.ts".to_string(),
+            "export function getToken(): string | number { return 'abc'; }".to_string(),
+        )];
+        let head_narrow = vec![(
+            "src/api.ts".to_string(),
+            "export function getToken(): string { return 'abc'; }".to_string(),
+        )];
+        let diff_narrow = diff_contracts(
+            &extract_in_memory_files(&base_files),
+            &extract_in_memory_files(&head_narrow),
+        );
+        assert_eq!(diff_narrow.required_bump, SemverImpact::Patch);
+        assert_eq!(diff_narrow.breaking_count, 0);
+
+        // Widening a return type (`string` -> `string | number`) MUST still be MAJOR!
+        let diff_wide = diff_contracts(
+            &extract_in_memory_files(&head_narrow),
+            &extract_in_memory_files(&base_files),
+        );
+        assert_eq!(diff_wide.required_bump, SemverImpact::Major);
+        assert_eq!(diff_wide.findings[0].code, ChangeCode::ReturnTypeChanged);
+    }
+
+    #[test]
+    fn test_34_rust_reachability_ignores_private_modules_and_tracks_pub_use() {
+        let files = vec![
+            (
+                "src/lib.rs".to_string(),
+                "mod internal;\npub use internal::Client;".to_string(),
+            ),
+            (
+                "src/internal.rs".to_string(),
+                r#"
+pub struct Client {
+    pub endpoint: String,
+}
+impl Client {
+    pub fn send(&self, body: &str) -> bool { true }
+}
+pub fn internal_unexported_helper() -> u32 { 42 }
+"#
+                .to_string(),
+            ),
+        ];
+
+        let snap = extract_in_memory_files(&files);
+        assert!(snap.symbols.contains_key("crate::Client"));
+        assert!(snap.symbols.contains_key("crate::Client::send"));
+        assert!(
+            !snap
+                .symbols
+                .values()
+                .any(|s| s.name == "internal_unexported_helper"),
+            "Unexported pub fn inside private `mod internal` must be ignored"
+        );
+    }
+
+    #[test]
+    fn test_35_rust_logical_id_immune_to_internal_file_move() {
+        let base_files = vec![
+            (
+                "src/lib.rs".to_string(),
+                "mod old_http;\npub use old_http::Client;".to_string(),
+            ),
+            (
+                "src/old_http.rs".to_string(),
+                "pub struct Client { pub host: String }\nimpl Client { pub fn send(&self) -> bool { true } }".to_string(),
+            ),
+        ];
+        let head_files = vec![
+            (
+                "src/lib.rs".to_string(),
+                "mod new_transport;\npub use new_transport::Client;".to_string(),
+            ),
+            (
+                "src/new_transport.rs".to_string(),
+                "pub struct Client { pub host: String }\nimpl Client { pub fn send(&self) -> bool { true } }".to_string(),
+            ),
+        ];
+
+        let diff = diff_contracts(
+            &extract_in_memory_files(&base_files),
+            &extract_in_memory_files(&head_files),
+        );
+        assert_eq!(diff.required_bump, SemverImpact::Patch);
+        assert_eq!(diff.breaking_count, 0);
+        assert!(!diff.contract_mutated);
+    }
+
+    #[test]
+    fn test_36_ts_package_json_exports_reachability_and_file_move() {
+        let base_files = vec![
+            (
+                "package.json".to_string(),
+                r#"{ "name": "@glastor/sdk", "exports": { ".": "./src/index.ts" } }"#.to_string(),
+            ),
+            (
+                "src/index.ts".to_string(),
+                r#"export { Client } from "./v1/client.ts";"#.to_string(),
+            ),
+            (
+                "src/v1/client.ts".to_string(),
+                "export class Client { public send(msg: string): boolean { return true; } }"
+                    .to_string(),
+            ),
+            (
+                "src/internal/secret.ts".to_string(),
+                "export function secretInternal(): void {}".to_string(),
+            ),
+        ];
+        let head_files = vec![
+            (
+                "package.json".to_string(),
+                r#"{ "name": "@glastor/sdk", "exports": { ".": "./src/index.ts" } }"#.to_string(),
+            ),
+            (
+                "src/index.ts".to_string(),
+                r#"export { Client } from "./http/client.ts";"#.to_string(),
+            ),
+            (
+                "src/http/client.ts".to_string(),
+                "export class Client { public send(msg: string): boolean { return true; } }"
+                    .to_string(),
+            ),
+        ];
+
+        let base_snap = extract_in_memory_files(&base_files);
+        assert!(base_snap.symbols.contains_key("pkg::Client"));
+        assert!(base_snap.symbols.contains_key("pkg::Client::send"));
+        assert!(
+            !base_snap
+                .symbols
+                .values()
+                .any(|s| s.name == "secretInternal")
+        );
+
+        let head_snap = extract_in_memory_files(&head_files);
+        let diff = diff_contracts(&base_snap, &head_snap);
+        assert_eq!(diff.required_bump, SemverImpact::Patch);
+        assert_eq!(diff.breaking_count, 0);
+        assert!(!diff.contract_mutated);
+    }
+
+    #[test]
+    fn test_37_deno_json_exports_reachability() {
+        let files = vec![
+            (
+                "deno.json".to_string(),
+                r#"{ "exports": { ".": "./mod.ts", "./utils": "./utils.ts" } }"#.to_string(),
+            ),
+            (
+                "mod.ts".to_string(),
+                "export function start(): void {}".to_string(),
+            ),
+            (
+                "utils.ts".to_string(),
+                "export function hash(s: string): string { return s; }".to_string(),
+            ),
+            (
+                "internal.ts".to_string(),
+                "export function unexported(): void {}".to_string(),
+            ),
+        ];
+
+        let snap = extract_in_memory_files(&files);
+        assert!(snap.symbols.contains_key("pkg::start"));
+        assert!(snap.symbols.contains_key("pkg/utils::hash"));
+        assert!(!snap.symbols.values().any(|s| s.name == "unexported"));
+    }
+
+    #[test]
+    fn test_38_specter_toml_ignore_paths_symbols_rules_and_severity() {
+        let cfg = SpecterConfig::parse_toml(
+            r#"
+ignore_paths = ["src/legacy/**"]
+ignore_symbols = ["*_experimental"]
+ignore_rules = ["SPC012"]
+strict_minor = true
+
+[rule_severity]
+SPC011 = "patch"
+"#,
+        )
+        .unwrap();
+
+        assert!(cfg.strict_minor);
+        let base = vec![
+            (
+                "src/legacy/old.rs".to_string(),
+                "pub fn removed_legacy() -> bool { true }".to_string(),
+            ),
+            (
+                "src/api.rs".to_string(),
+                "pub fn foo_experimental(x: u32) -> u32 { x }\npub fn stable() -> bool { true }"
+                    .to_string(),
+            ),
+        ];
+        let head = vec![(
+            "src/api.rs".to_string(),
+            "pub fn stable() -> bool { true }\npub fn brand_new() -> bool { true }".to_string(),
+        )];
+
+        let base_snap = extract_in_memory_files_with_config(&base, &cfg);
+        let head_snap = extract_in_memory_files_with_config(&head, &cfg);
+        let diff = diff_contracts_with_config(&base_snap, &head_snap, &cfg);
+
+        // `removed_legacy` ignored by path, `foo_experimental` ignored by symbol,
+        // `brand_new` (SPC011) downgraded to `patch` via rule_severity!
+        assert_eq!(diff.required_bump, SemverImpact::Patch);
+        assert_eq!(diff.breaking_count, 0);
+        assert_eq!(diff.minor_count, 0);
+    }
+
+    #[test]
+    fn test_39_inline_specter_ignore_requires_reason() {
+        let base = vec![(
+            "src/api.rs".to_string(),
+            "pub fn fetch(id: u32) -> bool { true }".to_string(),
+        )];
+
+        // With valid `-- reason`: SPC005 is suppressed
+        let head_suppressed = vec![(
+            "src/api.rs".to_string(),
+            "// specter-ignore: SPC005 -- planned v2 string IDs approved in RFC-12\npub fn fetch(id: &str) -> bool { true }".to_string(),
+        )];
+        let diff_ok = diff_contracts(
+            &extract_in_memory_files(&base),
+            &extract_in_memory_files(&head_suppressed),
+        );
+        assert_eq!(diff_ok.required_bump, SemverImpact::Patch);
+        assert_eq!(diff_ok.breaking_count, 0);
+
+        // Without `-- reason`: suppression is rejected and SPC005 still fires!
+        let head_no_reason = vec![(
+            "src/api.rs".to_string(),
+            "// specter-ignore: SPC005\npub fn fetch(id: &str) -> bool { true }".to_string(),
+        )];
+        let diff_fail = diff_contracts(
+            &extract_in_memory_files(&base),
+            &extract_in_memory_files(&head_no_reason),
+        );
+        assert_eq!(diff_fail.required_bump, SemverImpact::Major);
+        assert_eq!(diff_fail.findings[0].code, ChangeCode::ParamTypeChanged);
     }
 }

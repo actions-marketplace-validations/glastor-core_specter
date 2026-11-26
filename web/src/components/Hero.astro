@@ -29,7 +29,7 @@
 
       <!-- Subtitle in Red Hat Text -->
       <p class="font-sans text-base sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-        Stop trusting human and AI commit messages blindly. Specter detects <strong class="text-white">Trojan Breaking Changes</strong> across Rust and TypeScript public APIs in <strong>sub-5ms</strong> raw AST without invoking <code class="px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan text-sm font-mono">rustc</code> or <code class="px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan text-sm font-mono">tsc</code>.
+        Stop trusting human and AI commit messages blindly. Specter detects <strong class="text-white">Trojan Breaking Changes</strong> across Rust and TypeScript public APIs in <strong>sub-5ms</strong> raw AST without invoking <code class="notranslate px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan text-sm font-mono" translate="no">rustc</code> or <code class="notranslate px-1.5 py-0.5 rounded bg-cyber-card border border-cyber-border text-cyber-cyan text-sm font-mono" translate="no">tsc</code>.
       </p>
 
       <!-- Action Buttons -->
@@ -40,16 +40,16 @@
           rel="noopener noreferrer"
           class="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gradient-to-r from-cyber-indigo to-indigo-600 hover:from-cyber-indigoHover hover:to-indigo-500 text-white font-semibold text-sm shadow-xl shadow-cyber-indigo/25 flex items-center justify-center gap-2.5 transition-all hover:scale-[1.02] border border-indigo-400/30"
         >
-          <span class="material-symbols-outlined text-lg">store</span>
+          <span class="material-symbols-outlined notranslate text-lg" translate="no" aria-hidden="true">store</span>
           <span>Add to GitHub Workflow</span>
-          <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          <span class="material-symbols-outlined notranslate text-sm" translate="no" aria-hidden="true">arrow_forward</span>
         </a>
 
         <a
           href="#comparison"
           class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-cyber-card/90 hover:bg-slate-800 border border-cyber-border hover:border-cyber-cyan/50 text-slate-200 font-semibold text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
         >
-          <span class="material-symbols-outlined text-lg text-cyber-cyan">compare_arrows</span>
+          <span class="material-symbols-outlined notranslate text-lg text-cyber-cyan" translate="no" aria-hidden="true">compare_arrows</span>
           <span>View Comparison Matrix</span>
         </a>
       </div>
@@ -68,12 +68,12 @@
             class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-cyber-border/70 hover:bg-cyber-border text-xs text-cyber-cyan font-mono transition-colors"
             title="Copy snippet"
           >
-            <span class="material-symbols-outlined text-sm" id="copy-icon">content_copy</span>
+            <span class="material-symbols-outlined notranslate text-sm" id="copy-icon" translate="no" aria-hidden="true">content_copy</span>
             <span id="copy-text">Copy</span>
           </button>
         </div>
 
-        <pre class="font-mono text-xs sm:text-sm text-slate-300 overflow-x-auto leading-relaxed py-1"><code id="snippet-code"><span class="text-slate-500"># Plug & Play in &lt; 5ms — No rustc / tsc setup required</span>
+        <pre class="notranslate font-mono text-xs sm:text-sm text-slate-300 overflow-x-auto leading-relaxed py-1" translate="no"><code id="snippet-code" class="notranslate" translate="no"><span class="text-slate-500"># Plug & Play in &lt; 5ms — No rustc / tsc setup required</span>
 - <span class="text-cyber-cyan">name</span>: <span class="text-slate-200">Audit API Contract & SemVer Gate</span>
   <span class="text-cyber-cyan">uses</span>: <span class="text-cyber-emerald font-semibold">glastor-core/specter@v1</span>
   <span class="text-cyber-cyan">with</span>:
@@ -81,11 +81,11 @@
 
         <div class="mt-3 pt-3 border-t border-cyber-border/50 flex flex-wrap items-center justify-between text-[11px] text-slate-400 font-mono gap-2">
           <span class="flex items-center gap-1.5 text-cyber-emerald">
-            <span class="material-symbols-outlined text-sm">verified</span>
+            <span class="material-symbols-outlined notranslate text-sm" translate="no" aria-hidden="true">verified</span>
             <span>Zero build artifacts needed</span>
           </span>
           <span class="flex items-center gap-1.5 text-slate-400">
-            <span class="material-symbols-outlined text-sm">bolt</span>
+            <span class="material-symbols-outlined notranslate text-sm" translate="no" aria-hidden="true">bolt</span>
             <span>Takes ~3 seconds total step runtime</span>
           </span>
         </div>
@@ -95,31 +95,31 @@
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12 max-w-4xl mx-auto">
         <div class="p-4 rounded-xl bg-cyber-card/60 border border-cyber-border/80 text-left">
           <div class="flex items-center gap-2 text-cyber-cyan mb-1">
-            <span class="material-symbols-outlined text-lg">speed</span>
-            <span class="font-mono font-bold text-lg sm:text-xl text-white">&lt; 5 ms</span>
+            <span class="material-symbols-outlined notranslate text-lg" translate="no" aria-hidden="true">verified</span>
+            <span class="font-mono font-bold text-lg sm:text-xl text-white">0.00% FPR</span>
           </div>
-          <span class="text-xs text-slate-400">Pure AST diffing latency</span>
+          <span class="text-xs text-slate-400">105-case Golden Gate verified</span>
         </div>
 
         <div class="p-4 rounded-xl bg-cyber-card/60 border border-cyber-border/80 text-left">
           <div class="flex items-center gap-2 text-cyber-emerald mb-1">
-            <span class="material-symbols-outlined text-lg">cancel</span>
-            <span class="font-mono font-bold text-lg sm:text-xl text-white">0 Compilers</span>
+            <span class="material-symbols-outlined notranslate text-lg" translate="no" aria-hidden="true">account_tree</span>
+            <span class="font-mono font-bold text-lg sm:text-xl text-white">syn + oxc</span>
           </div>
-          <span class="text-xs text-slate-400">No rustc, tsc, or rustdoc</span>
+          <span class="text-xs text-slate-400">Official zero-compiler ASTs</span>
         </div>
 
         <div class="p-4 rounded-xl bg-cyber-card/60 border border-cyber-border/80 text-left">
           <div class="flex items-center gap-2 text-cyber-indigo mb-1">
-            <span class="material-symbols-outlined text-lg">layers</span>
-            <span class="font-mono font-bold text-lg sm:text-xl text-white">Polyglot</span>
+            <span class="material-symbols-outlined notranslate text-lg" translate="no" aria-hidden="true">hub</span>
+            <span class="font-mono font-bold text-lg sm:text-xl text-white">Reachability</span>
           </div>
-          <span class="text-xs text-slate-400">Rust & TypeScript / Deno</span>
+          <span class="text-xs text-slate-400">Logical IDs & specter.toml</span>
         </div>
 
         <div class="p-4 rounded-xl bg-cyber-card/60 border border-cyber-border/80 text-left">
           <div class="flex items-center gap-2 text-cyber-purple mb-1">
-            <span class="material-symbols-outlined text-lg">security</span>
+            <span class="material-symbols-outlined notranslate text-lg" translate="no" aria-hidden="true">security</span>
             <span class="font-mono font-bold text-lg sm:text-xl text-white">SARIF & SBOM</span>
           </div>
           <span class="text-xs text-slate-400">GitHub Code Scanning ready</span>

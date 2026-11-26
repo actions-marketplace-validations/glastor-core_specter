@@ -6,7 +6,7 @@
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-cyber-border text-slate-300 text-xs font-mono mb-4">
-        <span class="material-symbols-outlined text-sm">help</span>
+        <span class="material-symbols-outlined notranslate text-sm" translate="no" aria-hidden="true">help</span>
         <span>FREQUENTLY ASKED QUESTIONS</span>
       </div>
       <h2 class="font-display font-black text-3xl sm:text-5xl text-white tracking-tight mb-4">
@@ -23,7 +23,7 @@
       <details class="group rounded-2xl bg-cyber-card border border-cyber-border p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200">
         <summary class="flex items-center justify-between cursor-pointer text-white font-display font-bold text-lg hover:text-cyber-cyan transition-colors">
           <span>How does Specter diff APIs in &lt; 5 ms without invoking compilers?</span>
-          <span class="material-symbols-outlined text-cyber-cyan transition-transform duration-300 group-open:rotate-180">expand_more</span>
+          <span class="material-symbols-outlined notranslate text-cyber-cyan transition-transform duration-300 group-open:rotate-180" translate="no" aria-hidden="true">expand_more</span>
         </summary>
         <div class="mt-4 text-slate-300 font-sans text-sm leading-relaxed border-t border-cyber-border/60 pt-4">
           Specter uses high-speed, streaming AST parsers written in Rust (`syn` for Rust and optimized token parsers for TypeScript). It reads Git blob trees directly from memory via Git object streams—completely bypassing disk writes, typechecking, macro expansion, and dependency compilation.
@@ -34,10 +34,10 @@
       <details class="group rounded-2xl bg-cyber-card border border-cyber-border p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200">
         <summary class="flex items-center justify-between cursor-pointer text-white font-display font-bold text-lg hover:text-cyber-cyan transition-colors">
           <span>What is a "Trojan Breaking Change"?</span>
-          <span class="material-symbols-outlined text-cyber-cyan transition-transform duration-300 group-open:rotate-180">expand_more</span>
+          <span class="material-symbols-outlined notranslate text-cyber-cyan transition-transform duration-300 group-open:rotate-180" translate="no" aria-hidden="true">expand_more</span>
         </summary>
         <div class="mt-4 text-slate-300 font-sans text-sm leading-relaxed border-t border-cyber-border/60 pt-4">
-          A Trojan Breaking Change occurs when a pull request introduces a breaking API modification (such as deleting a function parameter or mutating an optional field to required) while hiding behind a non-breaking Conventional Commit title like <code class="text-cyber-cyan font-mono">fix(gateway): improve error handling</code>. Automated release pipelines blindly bump <code class="text-white font-mono">PATCH</code>, inadvertently breaking hundreds of downstream consumers. Specter cross-checks commit intent with AST reality and halts the PR gate.
+          A Trojan Breaking Change occurs when a pull request introduces a breaking API modification (such as deleting a function parameter or mutating an optional field to required) while hiding behind a non-breaking Conventional Commit title like <code class="notranslate text-cyber-cyan font-mono" translate="no">fix(gateway): improve error handling</code>. Automated release pipelines blindly bump <code class="notranslate text-white font-mono" translate="no">PATCH</code>, inadvertently breaking hundreds of downstream consumers. Specter cross-checks commit intent with AST reality and halts the PR gate.
         </div>
       </details>
 
@@ -45,7 +45,7 @@
       <details class="group rounded-2xl bg-cyber-card border border-cyber-border p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200">
         <summary class="flex items-center justify-between cursor-pointer text-white font-display font-bold text-lg hover:text-cyber-cyan transition-colors">
           <span>Does Specter support polyglot monorepos?</span>
-          <span class="material-symbols-outlined text-cyber-cyan transition-transform duration-300 group-open:rotate-180">expand_more</span>
+          <span class="material-symbols-outlined notranslate text-cyber-cyan transition-transform duration-300 group-open:rotate-180" translate="no" aria-hidden="true">expand_more</span>
         </summary>
         <div class="mt-4 text-slate-300 font-sans text-sm leading-relaxed border-t border-cyber-border/60 pt-4">
           Yes! Specter natively understands workspace manifests across Cargo workspaces (`Cargo.toml`), npm/pnpm/yarn workspaces (`package.json`), and Deno configurations (`deno.json`). It automatically isolates public export surfaces per package without requiring separate pipeline jobs.
@@ -56,7 +56,7 @@
       <details class="group rounded-2xl bg-cyber-card border border-cyber-border p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200">
         <summary class="flex items-center justify-between cursor-pointer text-white font-display font-bold text-lg hover:text-cyber-cyan transition-colors">
           <span>How does Specter integrate with GitHub Code Scanning & SBOM?</span>
-          <span class="material-symbols-outlined text-cyber-cyan transition-transform duration-300 group-open:rotate-180">expand_more</span>
+          <span class="material-symbols-outlined notranslate text-cyber-cyan transition-transform duration-300 group-open:rotate-180" translate="no" aria-hidden="true">expand_more</span>
         </summary>
         <div class="mt-4 text-slate-300 font-sans text-sm leading-relaxed border-t border-cyber-border/60 pt-4">
           Specter outputs native SARIF 2.1.0 telemetry for GitHub Security Code Scanning and CycloneDX 1.5 JSON API Contract SBOMs. Breaking changes appear directly in the GitHub PR conversation with file and line range inline annotations.
@@ -67,10 +67,10 @@
       <details class="group rounded-2xl bg-cyber-card border border-cyber-border p-6 [&_summary::-webkit-details-marker]:hidden transition-all duration-200">
         <summary class="flex items-center justify-between cursor-pointer text-white font-display font-bold text-lg hover:text-cyber-cyan transition-colors">
           <span>Why choose Specter over cargo-semver-checks?</span>
-          <span class="material-symbols-outlined text-cyber-cyan transition-transform duration-300 group-open:rotate-180">expand_more</span>
+          <span class="material-symbols-outlined notranslate text-cyber-cyan transition-transform duration-300 group-open:rotate-180" translate="no" aria-hidden="true">expand_more</span>
         </summary>
         <div class="mt-4 text-slate-300 font-sans text-sm leading-relaxed border-t border-cyber-border/60 pt-4">
-          <code>cargo-semver-checks</code> requires generating full <code>rustdoc JSON</code> for both the base commit and head commit, which takes 2 to 8 minutes on busy CI runners and consumes significant cloud minutes. Specter finishes in under 5 milliseconds, supports both Rust and TypeScript, and requires zero compiler installations.
+          <code class="notranslate" translate="no">cargo-semver-checks</code> requires generating full <code class="notranslate" translate="no">rustdoc JSON</code> for both the base commit and head commit, which takes 2 to 8 minutes on busy CI runners and consumes significant cloud minutes. Specter finishes in under 5 milliseconds, supports both Rust and TypeScript, and requires zero compiler installations.
         </div>
       </details>
     </div>

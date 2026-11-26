@@ -32,10 +32,39 @@ Este proyecto se adhiere a:
 
 ### 💡 Planned
 
-- Soporte extendido de extracción de contratos públicos para Go (`.go`) y Python
-  (`.py`).
+- Soporte extendido de extracción de contratos públicos para Go (`.go` vía `tree-sitter-go`) y Python
+  (`.py`/`.pyi` vía `ruff_python_parser`) con grafo de alcance y corpus Golden 0% FPR.
 - Exportación de atestaciones in-toto de contratos de API para verificación en
   runtime con `glastor-core/medusa`.
+
+---
+
+## [1.0.0] - 2026-11-25
+
+**Nombre del Release:** "Zero-Compiler Real AST (`syn` + `oxc_parser`), Enterprise Reachability Graph & 0% FPR Gate"
+
+### ✨ Added
+- **Migración a AST Real *Zero-Compiler* (`src/rust_ast.rs`, `src/ts_ast.rs`):**
+  - **Rust 2024 (`syn 3` + `proc-macro2`):** Parsing oficial de gramática Rust sin invocar `rustc`, soportando `pub(crate)`, `pub(super)`, cláusulas `where`, `pub use` anidados, módulos `#[cfg(test)]` en cualquier posición, `#[doc(hidden)]`, atributos en campos (`#[serde(...)]`) y `#[non_exhaustive]`.
+  - **TypeScript / JS / Deno (`oxc_parser 0.152`):** Parsing sub-milisegundo en Rust resolviendo *arrow functions* exportadas, expresiones de función, destructuring, decoradores, clases con profundidad AST real, JSDoc `@internal`/`@private` y *barrel re-exports*.
+- **Grafo de Alcance (Reachability) e Identidad Lógica (`src/reachability.rs`):**
+  - Auto-descubrimiento de entry points en Rust (`Cargo.toml` `[lib]`, Cargo `[workspace]` `*/src/lib.rs`, `src/lib.rs`) y TypeScript/Deno (`package.json` `exports`/`module`/`main`, `deno.json` `exports`).
+  - **Logical Symbol IDs** (`crate::Client::send`, `pkg::Client::send`): mover archivos internos detrás de `pub use` o *barrels* es 100% inmune a falsos `SPC001`, y los módulos privados no re-exportados se ignoran automáticamente.
+- **Configuración Enterprise (`specter.toml` / `.specter.toml`) y Supresiones Inline (`src/config.rs`):**
+  - Soporte para `entry_points`, `ignore_paths`, `ignore_symbols`, `ignore_rules`, `strict_minor` y `[rule_severity]` configurable por regla (`major` | `minor` | `patch` | `off`).
+  - Nuevas banderas CLI `--config <PATH>` y `--strict-minor`.
+  - Supresiones inline auditables `// specter-ignore: SPC005 -- motivo` (con motivo obligatorio tras `--`).
+- **Varianza Semántica en TypeScript y `#[non_exhaustive]` en Rust (`src/differ.rs`):**
+  - Contravarianza en parámetros TS (`T` -> `T | U` clasificado como `MINOR`).
+  - Covarianza en retornos TS (`T | U` -> `T` clasificado como compatible `PATCH`).
+  - Normalización canónica de tipos (ignora nombres de parámetros posicionales, normaliza lifetimes `'0`/`'1`, genéricos `T0`/`T1`, uniones ordenadas `A | B == B | A` y `Array<T> == T[]`; `const` evaluado por tipo y no por valor).
+  - Detección de `#[non_exhaustive]` en `pub struct`/`pub enum` de Rust (`MINOR` si es `#[non_exhaustive]`, `MAJOR` si es exhaustivo).
+- **Suite Golden de Regresión — 0% FPR Gate (`src/golden_fpr_suite.rs`):**
+  - 105 casos reales de refactorizaciones seguras en 12 categorías validados en cada `cargo test` con **0.00% de falsos positivos** (`40/40` tests en `0.17s`).
+- **Roadmap Oficial ([ROADMAP.md](ROADMAP.md)):** Plan completo documentado con métricas de auditoría en *Shadow Mode* sobre `hyper64`, `pii-veil`, `vektor` y `specter`.
+
+### 🔄 Changed
+- **BREAKING CHANGE (`PublicSymbol` & `CliArgs`):** Se añadieron los campos públicos `is_non_exhaustive` y `suppressions` en `PublicSymbol`, y `config` en `CliArgs`.
 
 ---
 
@@ -116,7 +145,7 @@ Guard & Mathematical SemVer Engine"\
 ## Enlaces & Recursos
 
 - 📖 [README.md](README.md) - Documentación General y Reglas de Contrato (`SPC001`–`SPC013`)
-- 🏛️ [CONTRIBUTORS.md](CONTRIBUTORS.md) - Gobernanza y Sostenibilidad Técnica
-- 🛡️ [SECURITY.md](.github/SECURITY.md) - Política de Seguridad y Arquitectura AppSec Zero-Trust
+- 🏛 [CONTRIBUTORS.md](CONTRIBUTORS.md) - Gobernanza y Sostenibilidad Técnica
+- 🛡 [SECURITY.md](.github/SECURITY.md) - Política de Seguridad y Arquitectura AppSec Zero-Trust
 - 📜 [LICENSE](LICENSE) - Términos de Licencia MIT
-- 🏷️ [CITATION.cff](CITATION.cff) - Referencia Académica y Metadatos de Software
+- 🏷 [CITATION.cff](CITATION.cff) - Referencia Académica y Metadatos de Software
